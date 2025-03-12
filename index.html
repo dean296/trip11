@@ -1,481 +1,1087 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAQ 검색</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            height: 100vh;
-        }
-        
-        .faq-section {
-            width: 20%;
-            padding: 20px;
-            border-right: 2px solid #ddd;
-            overflow-y: auto;
-            background: #ffffff;
-        }
-
-        .faq-container {
-            width: 100%;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 2px solid #ddd;
-        }
-        
-        .faq-item {
-            background: #f1f5fa;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            padding: 10px;
-            text-align: left;
-            font-weight: bold;
-        }
-        
-        .faq-item:hover {
-            background: #e0e0e0;
-        }
-
-        .faq-item.scenario {
-            background: #e9f0ff;
-            border-bottom: 2px solid #ddd;
-            font-weight: bold;
-        }
-
-        .faq-item.category {
-            background: #f1f5fa;
-            padding-left: 15px;
-            font-weight: bold;
-        }
-
-        .category-container {
-            display: none;
-            margin-top: 5px;
-            transition: all 0.3s ease-in-out;
-        }
-
-        .question-display {
-            width: 40%;
-            background: #f1f5fa;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-            height: 100vh;
-        }
-        
-        .selected-question {
-            font-size: 22px;
-            font-weight: bold;
-            color: #007bff;
-            margin-bottom: 10px;
-        }
-
-        .selected-response {
-            padding: 15px;
-            background: #e3f2fd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        .search-container {
-            padding-bottom: 10px;
-            margin-bottom: 10px;
-        }
-
-        .search-container input {
-            width: calc(100% - 40px);
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            display: block;
-            margin: 0 auto;
-        }
-
-        .faq-header {
-            display: flex;
-            align-items: center;
-        }
-
-        .info-button {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background-color: #007bff;
-            color: white;
-            text-align: center;
-            font-size: 16px;
-            font-weight: bold;
-            line-height: 24px;
-            cursor: pointer;
-            border: none;
-            margin-left: 5px;
-        }
-
-        .tooltip {
-            display: none;
-            position: fixed;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-size: 14px;
-            white-space: nowrap;
-            z-index: 1000;
-        }
-
-        .tooltip.show {
-            display: block;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ 검색</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      height: 100vh;
+    }
+    
+    /* 기본 데스크탑 레이아웃 */
+    #sidebar {
+      width: 20%;
+      padding: 20px;
+      border-right: 2px solid #ddd;
+      overflow-y: auto;
+      background: #ffffff;
+    }
+    
+    /* 가운데 Question 영역: 데스크탑에서 30%로 지정 (확대) */
+    #questionSection {
+      width: 30%;
+      padding: 20px;
+      border-right: 2px solid #ddd;
+      overflow-y: auto;
+      background: #ffffff;
+    }
+    
+    /* 오른쪽 Response 영역: 데스크탑에서 50%로 지정 */
+    .question-display {
+      width: 50%;
+      background: #f1f5fa;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      height: 100vh;
+    }
+    
+    /* 모바일 반응형 스타일 */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+        height: auto;
+      }
+      #sidebar, #questionSection, .question-display {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        margin-bottom: 20px;
+      }
+    }
+    
+    /* 왼쪽 사이드바 내 박스 크기 조정 */
+    #sidebar .faq-item {
+      padding: 5px;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    
+    /* 사이드바 레이블: 왼쪽 정렬, 볼드 처리 */
+    .sidebar-label {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 10px;
+      text-align: left;
+      font-weight: bold;
+    }
+    
+    /* 가운데 Question 영역 상단 레이블 */
+    .question-label {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    
+    /* 트리 구조 관련 스타일 */
+    .tree-node {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    
+    /* 상위 박스 (top-category) */
+    .tree-node > .faq-item.top-category {
+      position: relative;
+      z-index: 0;
+      background: #546e7a;
+      color: #fff;
+    }
+    
+    /* 자식들을 감싸는 컨테이너 - 기본은 닫힌 상태 */
+    .tree-children {
+      position: relative;
+      margin-left: 20px;
+      padding-left: 20px; /* 연결선과 내용 분리를 위해 */
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.5s ease-out;
+    }
+    /* 열렸을 때 최대 높이를 충분히 크게 설정 (내용이 잘리지 않도록) */
+    .tree-children.open {
+      max-height: 1000px;
+    }
+    
+    /* vertical-line 요소 (수직 연결선) */
+    .vertical-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2px;
+      background: #ccc;
+    }
+    
+    /* 각 자식 박스에 수평 연결선: 수직선과 박스 사이 선 */
+    .tree-children > .faq-item::before {
+      content: "";
+      position: absolute;
+      left: -20px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 2px;
+      background: #ccc;
+    }
+    
+    /* 기본 버튼 스타일 */
+    .faq-item {
+      position: relative;
+      z-index: 0;
+      background: #f1f5fa;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      cursor: pointer;
+      padding: 10px;
+      text-align: left;
+      font-weight: bold;
+    }
+    .faq-item:hover {
+      background: #e0e0e0;
+    }
+    
+    /* 전역 active 스타일 (중앙 Question 영역 등) */
+    .faq-item.active {
+      background: #555;
+      color: #fff;
+    }
+    
+    /* 왼쪽 사이드바 active 상태 - 글꼴 색은 변경 없이 배경만 진하게 */
+    #sidebar .faq-item.top-category.active {
+      background: #3c4a55;
+      color: #fff;
+    }
+    #sidebar .faq-item.scenario.active {
+      background: #8ab3e0;
+      color: #000;
+    }
+    #sidebar .faq-item.category.active {
+      background: #d1d6dc;
+      color: #000;
+    }
+    
+    /* scenario, category 기본 스타일 */
+    .faq-item.scenario {
+      background: #b3d7ff;
+      border-bottom: 2px solid #ddd;
+      font-weight: bold;
+      color: #000;
+    }
+    .faq-item.category {
+      background: #f1f5fa;
+      padding-left: 15px;
+      font-weight: bold;
+      color: #000;
+    }
+    
+    /* breadcrumb 스타일 (question 제외) */
+    .breadcrumb {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 10px;
+    }
+    /* 강조된 질문 스타일 */
+    .selected-question {
+      font-size: 22px;
+      font-weight: bold;
+      color: #007bff;
+      margin-bottom: 10px;
+    }
+    .selected-response {
+      padding: 15px;
+      background: #e3f2fd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    
+    .search-container {
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+    }
+    .search-container input {
+      width: calc(100% - 40px);
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      display: block;
+      margin: 0 auto;
+    }
+    
+    .faq-header {
+      display: flex;
+      align-items: center;
+    }
+    .info-button {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: #007bff;
+      color: white;
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      line-height: 24px;
+      cursor: pointer;
+      border: none;
+      margin-left: 5px;
+    }
+    
+    .tooltip {
+      display: none;
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 14px;
+      white-space: nowrap;
+      z-index: 1000;
+    }
+    .tooltip.show {
+      display: block;
+    }
+  </style>
 </head>
 <body>
-    <div class="faq-section">
-        <div class="faq-header">
-            <h1>FAQ 검색</h1>
-            <button class="info-button" onclick="toggleTooltip()">!</button>
-        </div>
-        
-        <div class="search-container">
-            <input type="text" id="search" placeholder="검색어를 입력하세요..." onkeyup="filterFAQ()">
-        </div>
-
-        <div class="faq-container" id="scenarioContainer"></div>
+  <!-- 왼쪽 사이드바 -->
+  <div class="faq-section" id="sidebar">
+    <div class="faq-header">
+      <h1>FAQ 검색</h1>
+      <button class="info-button" onclick="toggleTooltip()">!</button>
     </div>
     
-    <div class="faq-section" id="questionSection"></div>
-    <div class="question-display" id="questionDisplay">
-        <p>질문을 클릭하면 여기에 표시됩니다.</p>
+    <div class="search-container">
+      <input type="text" id="search" placeholder="검색어를 입력하세요..." onkeyup="filterFAQ()">
     </div>
-
-    <div class="tooltip" id="tooltip">FAQ 용어 정리 (검색이 용이하기 위해 일관된 단어로 검색해주세요.)<br>요금 : 금액, 가격, 객단가, 객실가, 단가<br>리뷰 : 후기, 이용후기, 평가, 별점<br>취소 : 중단, 중지, 제외, 철회, 보류, 종료, 해지<br>보상 : 리워드, 상품, 선물, 상금, 혜택</div>
-
-    <script>
-        const faqData = [
-            {
-                scenario: "도입",
-                category: "첫인사",
-                question: "[상담신청OB] 첫인사와 솔루션 소개",
-                response: "안녕하세요. 트립일레븐 마케팅 담당자 000입니다.<br>상담 신청하신 것을 확인하고 기쁜 마음으로 연락드리게 되었습니다.<br>해당 솔루션에 대해 짧게 안내드려도될까요?<br><br>솔루션은 대표적으로 4가지가 있는데요, 그중에서도 리뷰 프로모션은 가장 부담없이 시도해볼 수 있는 방법입니다.<br>요즘 고객들은 펜션을 선택할 때 최신 리뷰를 중요하게 보는데,<br>이 프로모션을 진행하면 고객이 보상을 받기 위해서 자연스럽게 리뷰를 작성할 수 있게 유도가 되고, 리뷰들이 쌓이면서 신뢰도를 높여서 예약 전환율 올릴 수 있습니다.<br>현재 약 300개 이상 펜션에서 진행 중이고, 실제로 예약률이 상승한 사례가 많습니다. 대표님도 한번 진행해보시는 건 어떨까요?"
-            },
-              {
-                scenario: "도입",
-                category: "첫인사",
-                question: "[기본OB] 첫인사와 솔루션 소개",
-                response: "안녕하세요. 트립일레븐 마케팅 담당자 000입니다.<br>대표님 펜션의 매출을 높일 수 있는 간단한 솔루션이 있어서 연락드렸습니다.<br>짧게 안내드려도될까요?<br><br>솔루션은 대표적으로 4가지가 있는데요, 그중에서도 리뷰 프로모션은 가장 부담없이 시도해볼 수 있는 방법입니다.<br>요즘 고객들은 펜션을 선택할 때 최신 리뷰를 중요하게 보는데,<br>이 프로모션을 진행하면 고객이 보상을 받기 위해서 자연스럽게 리뷰를 작성할 수 있게 유도가 되고, 리뷰들이 쌓이면서 신뢰도를 높여서 예약 전환율 올릴 수 있습니다.<br>현재 약 300개 이상 펜션에서 진행 중이고, 실제로 예약률이 상승한 사례가 많습니다. 대표님도 한번 진행해보시는 건 어떨까요?"
-            },
-            {
-                scenario: "도입",
-                category: "탐색질문",
-                question: "리뷰 프로모션이 뭔가요?",
-                response: "리뷰 프로모션은 이용을 마친 고객이 채널에 리뷰를 작성하고 인증하면 보상을 지급하는 마케팅 이벤트입니다.<br><br>예를 들어 배달 앱에서 리뷰 작성 시 사이드 메뉴를 제공하는 이벤트와 비슷한 방식이라고 생각하시면 됩니다.<br><br>리뷰 프로모션을 진행하면 트립에서 숙소를 이용한 고객에게 자동으로 이벤트 참여 링크를 발송해주고 참여한 고객의 리뷰를 검수 후 보상 지급하고, 비용은 정산에서 차감되므로 대표님께서는 별도 시간 부담 없이 손쉽게 진행할 수 있습니다."
-            },
-            {
-                scenario: "도입",
-                category: "탐색질문",
-                question: "왜 리뷰 프로모션을 하면 리뷰가 쌓이고 예약이 늘어나나요?",
-                response: "리뷰가 쌓이면 예약이 늘어나는 이유는, 소비자들은 최신 리뷰가 없으면 결정을 망설이기 때문입니다.<br>온라인 쇼핑을 하면서 최신 리뷰가 없으면 결제를 주저하는 것처럼, 펜션 고객도 최신 리뷰가 부족하면 신뢰도가 낮아져 예약을 미루거나 다른 펜션을 선택할 가능성이 커집니다.<br>반대로, 최신 리뷰가 많을수록 고객의 신뢰도가 높아지고 예약을 결정할 확률이 높아집니다.<br><br>하지만, 고객이 자발적으로 리뷰를 남길 확률은 매우 낮습니다.<br>별도의 적극적인 요청 없이 자발적인 리뷰를 기대하기는 어렵기때문에 리뷰 프로모션을 통해 보상을 제공하여 리뷰 작성을 유도하면, 최신 리뷰를 빠르게 누적시킬 수 있고 결과적으로 예약 전환 상승 효과를 기대할 수 있습니다."
-            },
-            {
-                scenario: "도입",
-                category: "탐색질문",
-                question: "리뷰 프로모션은 어떻게 진행되나요?",
-                response: "리뷰 프로모션은 고객이 펜션 이용 후 리뷰를 작성하고 인증하면 보상을 지급하는 방식으로 진행됩니다.<br>첫번째로, 고객이 예약을 완료하면 자동으로 알림톡 또는 문자를 통해 리뷰 프로모션 참여가 가능한 링크가 전송됩니다.<br>두번째로, 고객의 체크인, 체크아웃 시점에 맞춰 자동으로 프로모션 참여 독려 문자가 발송됩니다.<br>세번째로, 고객이 펜션 이용 후 링크에 접속하여 작성한 포토 리뷰의 캡쳐본을 업로드합니다.<br>네번째로, 트립일레븐에서 리뷰 내용을 확인한 후, 정상적으로 인증한 고객에게 네이버페이 1만원 권을 지급하고 고객에게 지급된 비용은 정산에서 차감됩니다."
-            },
-            {
-                scenario: "도입",
-                category: "탐색질문",
-                question: "문자서비스는 무엇인가요?",
-                response: "예약을 완료한 고객에게 체크인, 체크아웃 등 특정 시점에 문자를 자동으로 발송해주는 서비스입니다.<br>리뷰 프로모션 진행 시 참여 독려 문자를 발송하기 위해 이용이 필요합니다."
-            },
-            {
-                scenario: "도입",
-                category: "탐색질문",
-                question: "특정 채널(네이버, 여기어때 등)에서만 진행할 수도 있나요?",
-                response: "특정 채널에서만 진행하기보다는 모든 채널의 가능성을 열어놓고 진행하는 것이 리뷰 누적에 도움이 됩니다.<br>고객은 네이버, 야놀자, 여기어때, 아고다 등 다양한 채널을 통해 예약하기 때문에 모든 채널을 대상으로 진행됩니다."
-            },
-            {
-                scenario: "도입",
-                category: "효과",
-                question: "이 프로모션이 우리 펜션에 도움이 될까요?",
-                response: "네, 분명히 도움이 됩니다.<br>프로모션 참여 펜션들의 경우 미참여 펜션 대비 평균 거래액이 215% 더 높았습니다.<br>요즘 고객들은 단순히 가격이나 시설만 보고 예약하지 않기 때문에 프로모션을 통해 리뷰 수를 빠르게 늘리고 고객의 신뢰도를 높일 수 있습니다."
-            },
-            {
-                scenario: "도입",
-                category: "효과",
-                question: "다른 펜션들은 리뷰 관리를 어떻게 하고 있나요?",
-                response: "리뷰의 중요성이 높아진 만큼, 다른 펜션들도 리뷰 관리에 많은 투자를 하고 있습니다.<br>기본적으로 리뷰 프로모션은 물론, 게시된 리뷰를 꾸준히 모니터링하고 고객 피드백을 반영하면서 다양하게 마케팅하고 있습니다."
-            },
-            {
-                scenario: "도입",
-                category: "효과",
-                question: "다른 펜션들은 리뷰 프로모션을 통해 어떤 효과를 얻었나요?",
-                response: "리뷰 프로모션 참여한 펜션들의 경우 미참여 펜션 대비 평균 거래액이 215% 더 높은 것으로 확인되었으며,<br>포항 지역의 한 펜션은 오픈 이후 꾸준히 리뷰 프로모션을 진행하여 어려운 시장 상황 속에서도 작년 1월 대비 올해 1월 매출이 236% 상승한 사례가 있습니다."
-            },
-            {
-                scenario: "도입",
-                category: "효과",
-                question: "고객에게 리뷰 작성을 요청하면 효과가 있을까요?",
-                response: "네, 현장에서도 적극적으로 리뷰 작성을 독려해 주시면 좋습니다.<br>고객이 펜션에서 좋은 경험을 했을 때 자연스럽게 리뷰를 작성하도록 유도하는 것이 중요합니다.<br>체크아웃 시 [잘 쉬셨나요? 리뷰 남겨주시면 감사하겠습니다.] 같은 한마디만 건네도 작성률이 높아집니다."
-            },
-            {
-                scenario: "도입",
-                category: "탐색질문",
-                question: "자동으로 발송되는 문자의 내용은 어떻게 되나요?",
-                response: "고객에게 리뷰 프로모션 내용을 알리고 참여를 독려하는 내용입니다.<br>체크인 전과 체크아웃 후, 총 두 번에 걸쳐 리뷰를 작성하고 인증하면 보상을 지급한다는 자동 메시지가 발송됩니다."
-            },
-            {
-                scenario: "도입",
-                category: "효과",
-                question: "광고를 하는 것보다 리뷰를 늘리는 게 더 효과적인가요?",
-                response: "광고를 통해 노출을 늘리는 것도 중요하지만, 우선 최신 리뷰를 확보하고 리뷰 수를 충분히 늘려놓아야 효과를 볼 수 있습니다.<br>아무리 광고를 통해 많은 사람들이 숙소를 확인하더라도 리뷰가 없거나 최신성이 떨어진다면 신뢰를 얻기 어려워 예약으로 이어지기 어렵습니다.<br>따라서 광고 효과를 극대화하기 위해서는 리뷰 관리가 선행되어야 합니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "비용",
-                question: "비용은 얼마나 드나요?",
-                response: "트립 제휴 펜션이라면 별도의 서비스 이용 수수료는 없습니다.<br>다만, 고객이 리뷰를 작성하고 인증한 경우에 한해 1건당 1만 원의 보상 비용이 정산금에서 차감되며, 월 최대 20만 원 한도 내에서 운영됩니다.<br>또한, 고객에게 리뷰 참여를 독려하기 위해 자동 문자 발송 서비스에 대한 비용이 추가로 발생하며, 문자 비용은 단문 20원, 장문 40원입니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "비용",
-                question: "문자서비스 비용은 얼마인가요?",
-                response: "문자는 건당 단문 20원, 장문 40원이며, 최소 충전 비용은 부가세 포함 11,000원입니다.<br>체크인 전과 체크아웃 후 두 번 발송되므로 객실당 약 80원의 비용이 발생한다고 보시면 됩니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "운영방식",
-                question: "문자 서비스는 꼭 신청해야 하나요?",
-                response: "고객은 별도의 알림을 받지 않으면 프로모션 참여를 쉽게 잊어버립니다.<br>참여율을 높이기 위해서는 자동 문자 발송을 함께 진행하는 것이 효과적입니다.<br>실제로 자동으로 문자를 발송한 펜션이 알림을 보내지 않은 펜션보다 높은 참여율을 보인 사례가 많습니다.<br>이는 고객이 퇴실 후에도 알림을 받아 자연스럽게 참여할 수 있도록 유도되기 때문에 꼭 신청하시는 것을 추천드립니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "비용",
-                question: "객실 요금이 이미 낮은데 보상까지 지급하기 부담스러워요.",
-                response: "리뷰 프로모션은 예약한 모든 고객에게 보상이 지급되는 것이 아닙니다.<br>펜션을 이용한 고객 중에서도 리뷰를 작성하고 인증한 고객에게만 보상이 지급되므로 실제 지급 비율은 예약자 대비 낮은 편입니다.<br><br>또한, 월 한도 예산이 정해져 있어 선착순으로 마감되므로 부담 없이 운영할 수 있습니다.<br>예를 들어, 월 한도가 20만 원이고 1건당 1만 원의 리뷰 보상을 제공한다고 하면 20만 원을 투자하여 20개의 소중한 리뷰를 확보할 수 있습니다.<br>소액으로 최신 리뷰를 쌓아 고객 예약 전환율을 높이고, 결국 매출을 증가시킬 수 있습니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "비용",
-                question: "월 20만원 예산이 다 소진되면 어떻게 되나요?",
-                response: "선착순으로 월 예산이 모두 소진되면 자동으로 종료되고 다음달부터 다시 예산 초기화하여 진행됩니다.<br>예산에 맞춰 운영되기때문에 초과 걱정 없이 운영하실 수 있습니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "비용",
-                question: "월 20만원 예산이 부담스러워요.",
-                response: "한 달에 평균 20개의 리뷰를 꾸준히 확보하는 것이 효과적이기 때문에 예산은 20만 원으로 운영하시는 것을 추천드립니다.<br>꾸준하게 리뷰가 늘어나면 노출에도 긍정적인 영향을 주고, 고객에게 신뢰를 줄 수 있어 장기적으로 경쟁력을 갖출 수 있습니다.<br><br>(설득 불가 시)<br>그럼에도 부담스러우시다면 예산이나 보상 금액을 조정해드릴 수 있으나, 기대했던 만큼의 리뷰 확보는 어려울 수 있습니다.<br>월 예산을 N만 원(5만 원~20만 원)으로 조정하여 한 번 진행해보시는 것이 어떨까요?"
-            },
-            {
-                scenario: "상담진행",
-                category: "비용",
-                question: "보상 1만원은 너무 높아요, 더 낮은 금액은 불가한가요?",
-                response: "다양한 금액대를 설정하여 테스트한 결과, 1만 원 이상의 보상을 지급했을 때 고객의 참여율이 가장 높게 나타났습니다.<br>보상 금액이 낮아질수록 참여율이 감소하며, 일정 금액 이하로는 고객이 흥미를 느끼지 못하는 경우가 많았습니다.<br><br>특히 리뷰 작성은 고객의 자발적인 행동이 필요하기 때문에 충분한 동기 부여가 있어야 참여를 유도할 수 있습니다.<br>최적의 참여율을 유지하고 프로모션 효과를 보위해서는 1만 원 이상의 보상 지급하시는 걸 추천드립니다.<br><br>(설득 불가 시)<br>그럼에도 부담스러우시다면 예산이나 보상 금액을 조정해드릴 수 있으나, 기대했던 만큼의 리뷰 확보 어려울 수 있습니다.<br>우선 5,000원 보상으로 진행해보시는 것은 어떨까요?"
-            },
-            {
-                scenario: "상담진행",
-                category: "비용",
-                question: "리뷰를 남기는 고객 수가 도달 안하더라도 예산이 모두 소진되나요?",
-                response: "아닙니다.<br>고객이 리뷰를 남기지 않으면 보상이 지급되지 않기 때문에 무조건 예산이 모두 소진되는 것은 아닙니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "비용",
-                question: "리뷰 보상이 얼마나 지급되었는지 확인할 수 있나요?",
-                response: "네,가능합니다.<br>관리자 페이지의 [정산내역메뉴]에서 [정산목록]을 확인하시면 주별로 어떤 고객이 얼마의 보상을 받았는지 확인할 수 있습니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "운영방식",
-                question: "어떤 리뷰를 써야 보상이 지급되나요?",
-                response: "사진을 포함한 리뷰로 확인되면 보상이 제공됩니다.<br>다만 욕설이나 비방, 허위사실 등 악의적인 내용이 포함된 경우에는 보상을 지급하지 않습니다.<br>그리고 에어비앤비처럼 사진 첨부가 불가한 채널은 텍스트 내용 확인 후 발송합니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "운영방식",
-                question: "부정적인 리뷰에도 보상을 지급해야 하나요?",
-                response: "아닙니다, 트립일레븐에서 리뷰 캡쳐본을 받은 후, 긍정적인 리뷰인지 검토한 뒤에 보상을 발송하기 때문에 부정적인 리뷰에도 보상이 지급될까 걱정하지 않으셔도 됩니다.<br><지나친 악성 리뷰는 별도로 검토하여 지급 대상에서 제외되고 있습니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "운영방식",
-                question: "사진 리뷰는 필수인가요?",
-                response: "네, 사진 업로드는 필수입니다.<br>단, 에어비앤비와 같이 사진 첨부가 불가한 채널은 텍스트 리뷰로 대체됩니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "운영방식",
-                question: "고객이 리뷰를 작성했는지 어떻게 확인하나요?",
-                response: "고객이 리뷰 프로모션 참여 페이지에 리뷰 캡처본을 업로드하면, 트립에서 확인 후 보상을 지급해드립니다.<br>자동화된 시스템을 통해 누락 없이 정확하게 관리되므로 안심하고 이용하실 수 있습니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "운영방식",
-                question: "보상은 어떤 걸로 지급되나요?",
-                response: "기본적으로 1만 원 상당의 네이버페이 포인트를 지급하고 있습니다.<br>다만 참여율이 예상보다 낮을 경우 2만 원에서 최대 3만 원까지 보상 금액을 조정하는 것도 가능합니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "운영방식",
-                question: "리뷰 작성 후 보상은 언제 지급되나요?",
-                response: "고객이 참여한 날로부터 영업일 기준 5일 이내에 보상이 발송됩니다.<br>만약 보상을 받지 못한 고객이 있다면, 이는 선착순 지급 한도가 마감되었을 확률이 높은데, 만약 발생 시 문의주시면 확인해드리겠습니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "운영방식",
-                question: "네이버페이 외에 다른 보상 방법도 있나요?",
-                response: "현재는 네이버페이를 기본 보상으로 제공하고 있습니다.<br>고객들이 가장 선호하는 보상 방식이 현금성이 높은 상품이기 때문인데요,<br>실제로 네이버페이는 사용처가 많아 만족도가 높고, 리뷰 참여율도 가장 높은 것으로 확인되었습니다."
-            },
-            {
-                scenario: "도입",
-                category: "효과",
-                question: "리뷰 관리에 시간과 비용을 들일 만한 가치가 있나요?",
-                response: "네, 충분한 가치가 있습니다.<br>트립일레븐에서 리뷰 프로모션 관리를 자동화해서 진행해드리기 때문에 대표님께서 직접 관리하실 시간은 많이 들지 않습니다.<br>투자되는 비용 대비 예약 증가 효과가 큰 편이라 장기적으로 보면 매우 효율적인 마케팅입니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "운영방식",
-                question: "리뷰 프로모션을 신청했다가 중간에 취소할 수도 있나요?",
-                response: "리뷰 프로모션은 장기적인 투자이기 때문에 상시로 진행하시는 것을 권장드립니다.<br><br>그럼에도 불구하고 리뷰 프로모션 중단이 필요하시면 가능합니다.<br>다만 기존에 이미 참여한 고객이 있는 경우 해당 월의 예산까지는 보상이 지급될 수 있는 점 참고 부탁드립니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "반론",
-                question: "이미 리뷰가 많아서 필요 없어요.",
-                response: "기존 리뷰가 많더라도 리뷰의 최신성이 판매에 큰 영향을 미칩니다.<br>고객들은 리뷰 개수뿐만 아니라 최신 리뷰를 중요하게 생각합니다.<br>예를 들어, 1년 전에 작성된 리뷰가 많더라도 최근 몇 달 동안 새로운 리뷰가 없다면 고객 입장에서는 ‘지금도 좋은 서비스를 제공할까?’ 하는 의구심을 가질 수 있습니다.<br><br>그래서 대표님 펜션이 경쟁력을 가지려면 꾸준하게 최신 리뷰를 늘려야 합니다.<br>실제로 다른 펜션 대표님들도 기존 리뷰가 많음에도 불구하고 최신 리뷰를 유지하려고 리뷰 프로모션을 진행하고 있습니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "반론",
-                question: "우리 펜션은 단골 고객이 많은데, 리뷰 관리가 필요할까요?",
-                response: "단골 손님이 많다는 건 정말 좋은 강점입니다.<br>하지만 신규 고객을 유입시키려면 리뷰가 필수적입니다.<br>요즘 대부분의 고객이 온라인에서 펜션을 검색하고, 리뷰를 보고 선택하는데 리뷰가 많을수록 신규 고객은 [이 펜션 믿을 만하네] 하고 쉽게 예약 결정을 내릴 수 있습니다.<br>단골 손님들의 재방문만으로는 한계가 있고, 특히 비수기에는 새로운 고객을 유입시키는 게 중요합니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "반론",
-                question: "직접 고객에게 리뷰 프로모션을 안내하기엔 시간이 없어요.",
-                response: "리뷰 프로모션 진행을 위해 문자 자동 발송 서비스 신청을 안내드리고 있기 때문에 걱정하지 않으셔도 됩니다.<br>해당 서비스를 통해 고객에게 체크인 전과 체크아웃 후, 총 두 번 자동으로 리뷰 프로모션 참여 독려 문자가 발송됩니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "반론",
-                question: "이전에 진행했을 때 효과가 없었어요.",
-                response: "이전에는 효과를 보시기 어려우셨을 수도 있습니다.<br>하지만 지금은 고객에게 보여지는 페이지 UI, 참여 방법, 여러가지를 계속해서 개선했기 때문에 이전보다 고객의 참여율이 높은 상황입니다.<br>예를 들어, 초기에는 이벤트 페이지의 참여 방법이 간단한 텍스트 형식이었다면, 지금은 예시로 캡쳐된 리뷰 이미지를 포함하여 고객이 따라 하면서 쉽게 참여할 수 있도록 되어 있습니다.<br>리뷰 프로모션을 중단했다가 최근에 다시 진행한 대표님들도 만족하며 진행하고 있습니다."
-            },
-            {
-                scenario: "상담진행",
-                category: "반론",
-                question: "이미 직접 현장에서 리뷰 프로모션 진행하고 있어요.",
-                response: "어떤 방식으로 진행하고 계실까요?<br>(내용 들은 후)<br><br>네, 말씀주신 것처럼 대표님께서 리뷰의 중요성을 알고 계신 듯합니다.<br>다만, 현장에서 진행하시면 따로 시간을 들여 인증을 받아보셔야 하고, 그때마다 보상을 지급해야 하는 번거로움이 있지 않으신가요?<br>그리고 네이버 예약은 퇴실 이후부터 리뷰 작성이 가능하기 때문에 현장에서 안내하는 것만으로는 부족할 수 있습니다.<br>하지만 트립의 리뷰 프로모션은 고객이 퇴실하고도 쉽게 참여 가능하며, 리뷰 검수와 보상 발송을 대신해드리기 때문에 시간 부담이 전혀 없습니다.<br>게다가 리뷰 인증을 잘못한 고객에게도 재참여 방법을 안내하고있어 참여율을 높이는 데 도움이 됩니다."
-            },
-            {
-                scenario: "마무리",
-                category: "신청방법",
-                question: "리뷰 프로모션 신청 방법은 어떻게 되나요?",
-                response: "카카오톡 또는 전화로 리뷰 프로모션하고 싶다고 말씀 남겨주시면 순차적으로 진행해드리고 있습니다.<br><br>지금 신청 도와드릴까요?<br>(신청 동의 시, 이어서 문자 서비스 본인 인증 방법 안내)"
-            },
-            {
-                scenario: "마무리",
-                category: "신청방법",
-                question: "신청 후 언제부터 진행할 수 있나요?",
-                response: "신청하시면 문자서비스 가입까지 평균 하루 소요되며, 설정이 완료되면 바로 진행됩니다."
-            },
-            {
-                scenario: "마무리",
-                category: "신청방법",
-                question: "문자서비스는 어떻게 신청하나요?",
-                response: "관리자 페이지에서 본인 인증 후 신청 가능합니다.<br><br>자동 발송 문자 설정 메뉴에서 서비스 신청을 클릭한 다음, 휴대폰 본인 인증을 클릭해서 이용 중인 통신사를 선택하고 문자 SMS 인증 방법으로 진행해주시면 됩니다.<br>비용은 건당 단문 20원, 장문 40원이며 최초에는 선결제 방식으로 부가세 포함 11,000원 충전해주시면 됩니다.<br>이후 비용이 소진되면 후불로 정산 금액에서 자동으로 11,000원씩 차감됩니다."
-            },
-            {
-                scenario: "마무리",
-                category: "마무리인사",
-                question: "상담 완료 후 마무리 인사",
-                response: "(신청한 경우)<br>대표님, 리뷰 보상 1건당 00원, 월 예산 한도 00원으로 신청 접수 되었습니다.<br>프로모션 효과를 최대한 보실 수 있도록 지속적으로 모니터링하겠습니다. 신청해 주셔서 감사합니다.<br><br>(미신청한 경우)<br>대표님, 우선 이번에는 진행하지않는 걸로 하겠습니다.<br>다만, 안내드린 것처럼 리뷰 프로모션은 예약률을 높이는 가장 기초적인 솔루션 중 하나 입니다.<br>한 번 더 고민해 보시고, 필요하시면 언제든 말씀 주세요. 감사합니다."
-            },
-        ];
-
-        function renderScenarios() {
-            const container = document.getElementById("scenarioContainer");
-            container.innerHTML = '';
-            const scenarios = [...new Set(faqData.map(item => item.scenario))];
-
-            scenarios.forEach(scenario => {
-                const scenarioDiv = document.createElement("div");
-                scenarioDiv.classList.add("faq-item", "scenario");
-                scenarioDiv.textContent = scenario;
-                scenarioDiv.onclick = () => toggleCategories(scenario);
-
-                const categoryContainer = document.createElement("div");
-                categoryContainer.classList.add("category-container");
-                categoryContainer.id = `category-${scenario}`;
-
-                container.appendChild(scenarioDiv);
-                container.appendChild(categoryContainer);
-            });
+    <!-- 검색 바 아래 텍스트: 왼쪽 정렬, 볼드 처리 -->
+    <p class="sidebar-label"><strong>1️⃣ 파트너 질문 유형 선택</strong></p>
+    
+    <!-- Top Category 트리 출력 영역 -->
+    <div id="topCategoryContainer"></div>
+  </div>
+  
+  <!-- 가운데 Question 영역 -->
+  <div class="faq-section" id="questionSection">
+    <!-- 상단 텍스트 수정 -->
+    <p class="question-label">2️⃣ 파트너 질문 선택</p>
+  </div>
+  
+  <!-- 오른쪽 Response 영역 -->
+  <div class="question-display" id="questionDisplay">
+    <p>질문을 클릭하면 여기에 표시됩니다.</p>
+  </div>
+  
+  <div class="tooltip" id="tooltip">
+    FAQ 용어 정리 (검색이 용이하기 위해 일관된 단어로 검색해주세요.)<br>
+    요금 : 금액, 가격, 객단가, 객실가, 단가<br>
+    리뷰 : 후기, 이용후기, 평가, 별점<br>
+    취소 : 중단, 중지, 제외, 철회, 보류, 종료, 해지<br>
+    보상 : 리워드, 상품, 선물, 상금, 혜택
+  </div>
+  
+  <script>
+    const faqData = [
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "도입",
+    category: "첫인사",
+    question: "[상담신청OB] 첫인사와 솔루션 소개",
+    response: "안녕하세요. 트립일레븐 마케팅 담당자 000입니다.<br>상담 신청하신 것을 확인하고 기쁜 마음으로 연락드리게 되었습니다.<br>해당 솔루션에 대해 짧게 안내드려도될까요?<br><br>솔루션은 대표적으로 4가지가 있는데요, 그중에서도 리뷰 프로모션은 가장 부담없이 시도해볼 수 있는 방법입니다.<br>요즘 고객들은 펜션을 선택할 때 최신 리뷰를 중요하게 보는데,<br>이 프로모션을 진행하면 고객이 보상을 받기 위해서 자연스럽게 리뷰를 작성할 수 있게 유도가 되고, 리뷰들이 쌓이면서 신뢰도를 높여서 예약 전환율 올릴 수 있습니다.<br>현재 약 300개 이상 펜션에서 진행 중이고, 실제로 예약률이 상승한 사례가 많습니다. 대표님도 한번 진행해보시는 건 어떨까요?"
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "도입",
+    category: "첫인사",
+    question: "[기본OB] 첫인사와 솔루션 소개",
+    response: "안녕하세요. 트립일레븐 마케팅 담당자 000입니다.<br>대표님 펜션의 매출을 높일 수 있는 간단한 솔루션이 있어서 연락드렸습니다.<br>짧게 안내드려도될까요?<br><br>솔루션은 대표적으로 4가지가 있는데요, 그중에서도 리뷰 프로모션은 가장 부담없이 시도해볼 수 있는 방법입니다.<br>요즘 고객들은 펜션을 선택할 때 최신 리뷰를 중요하게 보는데,<br>이 프로모션을 진행하면 고객이 보상을 받기 위해서 자연스럽게 리뷰를 작성할 수 있게 유도가 되고, 리뷰들이 쌓이면서 신뢰도를 높여서 예약 전환율 올릴 수 있습니다.<br>현재 약 300개 이상 펜션에서 진행 중이고, 실제로 예약률이 상승한 사례가 많습니다. 대표님도 한번 진행해보시는 건 어떨까요?"
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "도입",
+    category: "탐색질문",
+    question: "리뷰 프로모션이 뭔가요?",
+    response: "리뷰 프로모션은 이용을 마친 고객이 채널에 리뷰를 작성하고 인증하면 보상을 지급하는 마케팅 이벤트입니다.<br><br>예를 들어 배달 앱에서 리뷰 작성 시 사이드 메뉴를 제공하는 이벤트와 비슷한 방식이라고 생각하시면 됩니다.<br><br>리뷰 프로모션을 진행하면 트립에서 숙소를 이용한 고객에게 자동으로 이벤트 참여 링크를 발송해주고 참여한 고객의 리뷰를 검수 후 보상 지급하고, 비용은 정산에서 차감되므로 대표님께서는 별도 시간 부담 없이 손쉽게 진행할 수 있습니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "도입",
+    category: "탐색질문",
+    question: "왜 리뷰 프로모션을 하면 리뷰가 쌓이고 예약이 늘어나나요?",
+    response: "리뷰가 쌓이면 예약이 늘어나는 이유는, 소비자들은 최신 리뷰가 없으면 결정을 망설이기 때문입니다.<br>온라인 쇼핑을 하면서 최신 리뷰가 없으면 결제를 주저하는 것처럼, 펜션 고객도 최신 리뷰가 부족하면 신뢰도가 낮아져 예약을 미루거나 다른 펜션을 선택할 가능성이 커집니다.<br>반대로, 최신 리뷰가 많을수록 고객의 신뢰도가 높아지고 예약을 결정할 확률이 높아집니다.<br><br>하지만, 고객이 자발적으로 리뷰를 남길 확률은 매우 낮습니다.<br>별도의 적극적인 요청 없이 자발적인 리뷰를 기대하기는 어렵기때문에 리뷰 프로모션을 통해 보상을 제공하여 리뷰 작성을 유도하면, 최신 리뷰를 빠르게 누적시킬 수 있고 결과적으로 예약 전환 상승 효과를 기대할 수 있습니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "도입",
+    category: "탐색질문",
+    question: "리뷰 프로모션은 어떻게 진행되나요?",
+    response: "리뷰 프로모션은 고객이 펜션 이용 후 리뷰를 작성하고 인증하면 보상을 지급하는 방식으로 진행됩니다.<br>첫번째로, 고객이 예약을 완료하면 자동으로 알림톡 또는 문자를 통해 리뷰 프로모션 참여가 가능한 링크가 전송됩니다.<br>두번째로, 고객의 체크인, 체크아웃 시점에 맞춰 자동으로 프로모션 참여 독려 문자가 발송됩니다.<br>세번째로, 고객이 펜션 이용 후 링크에 접속하여 작성한 포토 리뷰의 캡쳐본을 업로드합니다.<br>네번째로, 트립일레븐에서 리뷰 내용을 확인한 후, 정상적으로 인증한 고객에게 네이버페이 1만원 권을 지급하고 고객에게 지급된 비용은 정산에서 차감됩니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "도입",
+    category: "탐색질문",
+    question: "문자서비스는 무엇인가요?",
+    response: "예약을 완료한 고객에게 체크인, 체크아웃 등 특정 시점에 문자를 자동으로 발송해주는 서비스입니다.<br>리뷰 프로모션 진행 시 참여 독려 문자를 발송하기 위해 이용이 필요합니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "도입",
+    category: "탐색질문",
+    question: "특정 채널(네이버, 여기어때 등)에서만 진행할 수도 있나요?",
+    response: "특정 채널에서만 진행하기보다는 모든 채널의 가능성을 열어놓고 진행하는 것이 리뷰 누적에 도움이 됩니다.<br>고객은 네이버, 야놀자, 여기어때, 아고다 등 다양한 채널을 통해 예약하기 때문에 모든 채널을 대상으로 진행됩니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "도입",
+    category: "효과",
+    question: "이 프로모션이 우리 펜션에 도움이 될까요?",
+    response: "네, 분명히 도움이 됩니다.<br>프로모션 참여 펜션들의 경우 미참여 펜션 대비 평균 거래액이 215% 더 높았습니다.<br>요즘 고객들은 단순히 가격이나 시설만 보고 예약하지 않기 때문에 프로모션을 통해 리뷰 수를 빠르게 늘리고 고객의 신뢰도를 높일 수 있습니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "도입",
+    category: "효과",
+    question: "다른 펜션들은 리뷰 관리를 어떻게 하고 있나요?",
+    response: "리뷰의 중요성이 높아진 만큼, 다른 펜션들도 리뷰 관리에 많은 투자를 하고 있습니다.<br>기본적으로 리뷰 프로모션은 물론, 게시된 리뷰를 꾸준히 모니터링하고 고객 피드백을 반영하면서 다양하게 마케팅하고 있습니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "도입",
+    category: "효과",
+    question: "다른 펜션들은 리뷰 프로모션을 통해 어떤 효과를 얻었나요?",
+    response: "리뷰 프로모션 참여한 펜션들의 경우 미참여 펜션 대비 평균 거래액이 215% 더 높은 것으로 확인되었으며,<br>포항 지역의 한 펜션은 오픈 이후 꾸준히 리뷰 프로모션을 진행하여 어려운 시장 상황 속에서도 작년 1월 대비 올해 1월 매출이 236% 상승한 사례가 있습니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "도입",
+    category: "효과",
+    question: "고객에게 리뷰 작성을 요청하면 효과가 있을까요?",
+    response: "네, 현장에서도 적극적으로 리뷰 작성을 독려해 주시면 좋습니다.<br>고객이 펜션에서 좋은 경험을 했을 때 자연스럽게 리뷰를 작성하도록 유도하는 것이 중요합니다.<br>체크아웃 시 [잘 쉬셨나요? 리뷰 남겨주시면 감사하겠습니다.] 같은 한마디만 건네도 작성률이 높아집니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "도입",
+    category: "탐색질문",
+    question: "자동으로 발송되는 문자의 내용은 어떻게 되나요?",
+    response: "고객에게 리뷰 프로모션 내용을 알리고 참여를 독려하는 내용입니다.<br>체크인 전과 체크아웃 후, 총 두 번에 걸쳐 리뷰를 작성하고 인증하면 보상을 지급한다는 자동 메시지가 발송됩니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "도입",
+    category: "효과",
+    question: "광고를 하는 것보다 리뷰를 늘리는 게 더 효과적인가요?",
+    response: "광고를 통해 노출을 늘리는 것도 중요하지만, 우선 최신 리뷰를 확보하고 리뷰 수를 충분히 늘려놓아야 효과를 볼 수 있습니다.<br>아무리 광고를 통해 많은 사람들이 숙소를 확인하더라도 리뷰가 없거나 최신성이 떨어진다면 신뢰를 얻기 어려워 예약으로 이어지기 어렵습니다.<br>따라서 광고 효과를 극대화하기 위해서는 리뷰 관리가 선행되어야 합니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "비용",
+    question: "비용은 얼마나 드나요?",
+    response: "트립 제휴 펜션이라면 별도의 서비스 이용 수수료는 없습니다.<br>다만, 고객이 리뷰를 작성하고 인증한 경우에 한해 1건당 1만 원의 보상 비용이 정산금에서 차감되며, 월 최대 20만 원 한도 내에서 운영됩니다.<br>또한, 고객에게 리뷰 참여를 독려하기 위해 자동 문자 발송 서비스에 대한 비용이 추가로 발생하며, 문자 비용은 단문 20원, 장문 40원입니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "비용",
+    question: "문자서비스 비용은 얼마인가요?",
+    response: "문자는 건당 단문 20원, 장문 40원이며, 최소 충전 비용은 부가세 포함 11,000원입니다.<br>체크인 전과 체크아웃 후 두 번 발송되므로 객실당 약 80원의 비용이 발생한다고 보시면 됩니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "운영방식",
+    question: "문자 서비스는 꼭 신청해야 하나요?",
+    response: "고객은 별도의 알림을 받지 않으면 프로모션 참여를 쉽게 잊어버립니다.<br>참여율을 높이기 위해서는 자동 문자 발송을 함께 진행하는 것이 효과적입니다.<br>실제로 자동으로 문자를 발송한 펜션이 알림을 보내지 않은 펜션보다 높은 참여율을 보인 사례가 많습니다.<br>이는 고객이 퇴실 후에도 알림을 받아 자연스럽게 참여할 수 있도록 유도되기 때문에 꼭 신청하시는 것을 추천드립니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "비용",
+    question: "객실 요금이 이미 낮은데 보상까지 지급하기 부담스러워요.",
+    response: "리뷰 프로모션은 예약한 모든 고객에게 보상이 지급되는 것이 아닙니다.<br>펜션을 이용한 고객 중에서도 리뷰를 작성하고 인증한 고객에게만 보상이 지급되므로 실제 지급 비율은 예약자 대비 낮은 편입니다.<br><br>또한, 월 한도 예산이 정해져 있어 선착순으로 마감되므로 부담 없이 운영할 수 있습니다.<br>예를 들어, 월 한도가 20만 원이고 1건당 1만 원의 리뷰 보상을 제공한다고 하면 20만 원을 투자하여 20개의 소중한 리뷰를 확보할 수 있습니다.<br>소액으로 최신 리뷰를 쌓아 고객 예약 전환율을 높이고, 결국 매출을 증가시킬 수 있습니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "비용",
+    question: "월 20만원 예산이 다 소진되면 어떻게 되나요?",
+    response: "선착순으로 월 예산이 모두 소진되면 자동으로 종료되고 다음달부터 다시 예산 초기화하여 진행됩니다.<br>예산에 맞춰 운영되기때문에 초과 걱정 없이 운영하실 수 있습니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "비용",
+    question: "월 20만원 예산이 부담스러워요.",
+    response: "한 달에 평균 20개의 리뷰를 꾸준히 확보하는 것이 효과적이기 때문에 예산은 20만 원으로 운영하시는 것을 추천드립니다.<br>꾸준하게 리뷰가 늘어나면 노출에도 긍정적인 영향을 주고, 고객에게 신뢰를 줄 수 있어 장기적으로 경쟁력을 갖출 수 있습니다.<br><br>(설득 불가 시)<br>그럼에도 부담스러우시다면 예산이나 보상 금액을 조정해드릴 수 있으나, 기대했던 만큼의 리뷰 확보는 어려울 수 있습니다.<br>월 예산을 N만 원(5만 원~20만 원)으로 조정하여 한 번 진행해보시는 것이 어떨까요?"
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "비용",
+    question: "보상 1만원은 너무 높아요, 더 낮은 금액은 불가한가요?",
+    response: "다양한 금액대를 설정하여 테스트한 결과, 1만 원 이상의 보상을 지급했을 때 고객의 참여율이 가장 높게 나타났습니다.<br>보상 금액이 낮아질수록 참여율이 감소하며, 일정 금액 이하로는 고객이 흥미를 느끼지 못하는 경우가 많았습니다.<br><br>특히 리뷰 작성은 고객의 자발적인 행동이 필요하기 때문에 충분한 동기 부여가 있어야 참여를 유도할 수 있습니다.<br>최적의 참여율을 유지하고 프로모션 효과를 보위해서는 1만 원 이상의 보상 지급하시는 걸 추천드립니다.<br><br>(설득 불가 시)<br>그럼에도 부담스러우시다면 예산이나 보상 금액을 조정해드릴 수 있으나, 기대했던 만큼의 리뷰 확보 어려울 수 있습니다.<br>우선 5,000원 보상으로 진행해보시는 것은 어떨까요?"
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "비용",
+    question: "리뷰를 남기는 고객 수가 도달 안하더라도 예산이 모두 소진되나요?",
+    response: "아닙니다.<br>고객이 리뷰를 남기지 않으면 보상이 지급되지 않기 때문에 무조건 예산이 모두 소진되는 것은 아닙니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "비용",
+    question: "리뷰 보상이 얼마나 지급되었는지 확인할 수 있나요?",
+    response: "네,가능합니다.<br>관리자 페이지의 [정산내역메뉴]에서 [정산목록]을 확인하시면 주별로 어떤 고객이 얼마의 보상을 받았는지 확인할 수 있습니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "운영방식",
+    question: "어떤 리뷰를 써야 보상이 지급되나요?",
+    response: "사진을 포함한 리뷰로 확인되면 보상이 제공됩니다.<br>다만 욕설이나 비방, 허위사실 등 악의적인 내용이 포함된 경우에는 보상을 지급하지 않습니다.<br>그리고 에어비앤비처럼 사진 첨부가 불가한 채널은 텍스트 내용 확인 후 발송합니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "운영방식",
+    question: "부정적인 리뷰에도 보상을 지급해야 하나요?",
+    response: "아닙니다, 트립일레븐에서 리뷰 캡쳐본을 받은 후, 긍정적인 리뷰인지 검토한 뒤에 보상을 발송하기 때문에 부정적인 리뷰에도 보상이 지급될까 걱정하지 않으셔도 됩니다.<br><지나친 악성 리뷰는 별도로 검토하여 지급 대상에서 제외되고 있습니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "운영방식",
+    question: "사진 리뷰는 필수인가요?",
+    response: "네, 사진 업로드는 필수입니다.<br>단, 에어비앤비와 같이 사진 첨부가 불가한 채널은 텍스트 리뷰로 대체됩니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "운영방식",
+    question: "고객이 리뷰를 작성했는지 어떻게 확인하나요?",
+    response: "고객이 리뷰 프로모션 참여 페이지에 리뷰 캡처본을 업로드하면, 트립에서 확인 후 보상을 지급해드립니다.<br>자동화된 시스템을 통해 누락 없이 정확하게 관리되므로 안심하고 이용하실 수 있습니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "운영방식",
+    question: "보상은 어떤 걸로 지급되나요?",
+    response: "기본적으로 1만 원 상당의 네이버페이 포인트를 지급하고 있습니다.<br>다만 참여율이 예상보다 낮을 경우 2만 원에서 최대 3만 원까지 보상 금액을 조정하는 것도 가능합니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "운영방식",
+    question: "리뷰 작성 후 보상은 언제 지급되나요?",
+    response: "고객이 참여한 날로부터 영업일 기준 5일 이내에 보상이 발송됩니다.<br>만약 보상을 받지 못한 고객이 있다면, 이는 선착순 지급 한도가 마감되었을 확률이 높은데, 만약 발생 시 문의주시면 확인해드리겠습니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "운영방식",
+    question: "네이버페이 외에 다른 보상 방법도 있나요?",
+    response: "현재는 네이버페이를 기본 보상으로 제공하고 있습니다.<br>고객들이 가장 선호하는 보상 방식이 현금성이 높은 상품이기 때문인데요,<br>실제로 네이버페이는 사용처가 많아 만족도가 높고, 리뷰 참여율도 가장 높은 것으로 확인되었습니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "도입",
+    category: "효과",
+    question: "리뷰 관리에 시간과 비용을 들일 만한 가치가 있나요?",
+    response: "네, 충분한 가치가 있습니다.<br>트립일레븐에서 리뷰 프로모션 관리를 자동화해서 진행해드리기 때문에 대표님께서 직접 관리하실 시간은 많이 들지 않습니다.<br>투자되는 비용 대비 예약 증가 효과가 큰 편이라 장기적으로 보면 매우 효율적인 마케팅입니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "운영방식",
+    question: "리뷰 프로모션을 신청했다가 중간에 취소할 수도 있나요?",
+    response: "리뷰 프로모션은 장기적인 투자이기 때문에 상시로 진행하시는 것을 권장드립니다.<br><br>그럼에도 불구하고 리뷰 프로모션 중단이 필요하시면 가능합니다.<br>다만 기존에 이미 참여한 고객이 있는 경우 해당 월의 예산까지는 보상이 지급될 수 있는 점 참고 부탁드립니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "반론",
+    question: "이미 리뷰가 많아서 필요 없어요.",
+    response: "기존 리뷰가 많더라도 리뷰의 최신성이 판매에 큰 영향을 미칩니다.<br>고객들은 리뷰 개수뿐만 아니라 최신 리뷰를 중요하게 생각합니다.<br>예를 들어, 1년 전에 작성된 리뷰가 많더라도 최근 몇 달 동안 새로운 리뷰가 없다면 고객 입장에서는 ‘지금도 좋은 서비스를 제공할까?’ 하는 의구심을 가질 수 있습니다.<br><br>그래서 대표님 펜션이 경쟁력을 가지려면 꾸준하게 최신 리뷰를 늘려야 합니다.<br>실제로 다른 펜션 대표님들도 기존 리뷰가 많음에도 불구하고 최신 리뷰를 유지하려고 리뷰 프로모션을 진행하고 있습니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "반론",
+    question: "우리 펜션은 단골 고객이 많은데, 리뷰 관리가 필요할까요?",
+    response: "단골 손님이 많다는 건 정말 좋은 강점입니다.<br>하지만 신규 고객을 유입시키려면 리뷰가 필수적입니다.<br>요즘 대부분의 고객이 온라인에서 펜션을 검색하고, 리뷰를 보고 선택하는데 리뷰가 많을수록 신규 고객은 [이 펜션 믿을 만하네] 하고 쉽게 예약 결정을 내릴 수 있습니다.<br>단골 손님들의 재방문만으로는 한계가 있고, 특히 비수기에는 새로운 고객을 유입시키는 게 중요합니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "반론",
+    question: "직접 고객에게 리뷰 프로모션을 안내하기엔 시간이 없어요.",
+    response: "리뷰 프로모션 진행을 위해 문자 자동 발송 서비스 신청을 안내드리고 있기 때문에 걱정하지 않으셔도 됩니다.<br>해당 서비스를 통해 고객에게 체크인 전과 체크아웃 후, 총 두 번 자동으로 리뷰 프로모션 참여 독려 문자가 발송됩니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "반론",
+    question: "이전에 진행했을 때 효과가 없었어요.",
+    response: "이전에는 효과를 보시기 어려우셨을 수도 있습니다.<br>하지만 지금은 고객에게 보여지는 페이지 UI, 참여 방법, 여러가지를 계속해서 개선했기 때문에 이전보다 고객의 참여율이 높은 상황입니다.<br>예를 들어, 초기에는 이벤트 페이지의 참여 방법이 간단한 텍스트 형식이었다면, 지금은 예시로 캡쳐된 리뷰 이미지를 포함하여 고객이 따라 하면서 쉽게 참여할 수 있도록 되어 있습니다.<br>리뷰 프로모션을 중단했다가 최근에 다시 진행한 대표님들도 만족하며 진행하고 있습니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "상담진행",
+    category: "반론",
+    question: "이미 직접 현장에서 리뷰 프로모션 진행하고 있어요.",
+    response: "어떤 방식으로 진행하고 계실까요?<br>(내용 들은 후)<br><br>네, 말씀주신 것처럼 대표님께서 리뷰의 중요성을 알고 계신 듯합니다.<br>다만, 현장에서 진행하시면 따로 시간을 들여 인증을 받아보셔야 하고, 그때마다 보상을 지급해야 하는 번거로움이 있지 않으신가요?<br>그리고 네이버 예약은 퇴실 이후부터 리뷰 작성이 가능하기 때문에 현장에서 안내하는 것만으로는 부족할 수 있습니다.<br>하지만 트립의 리뷰 프로모션은 고객이 퇴실하고도 쉽게 참여 가능하며, 리뷰 검수와 보상 발송을 대신해드리기 때문에 시간 부담이 전혀 없습니다.<br>게다가 리뷰 인증을 잘못한 고객에게도 재참여 방법을 안내하고있어 참여율을 높이는 데 도움이 됩니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "마무리",
+    category: "신청방법",
+    question: "리뷰 프로모션 신청 방법은 어떻게 되나요?",
+    response: "카카오톡 또는 전화로 리뷰 프로모션하고 싶다고 말씀 남겨주시면 순차적으로 진행해드리고 있습니다.<br><br>지금 신청 도와드릴까요?<br>(신청 동의 시, 이어서 문자 서비스 본인 인증 방법 안내)"
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "마무리",
+    category: "신청방법",
+    question: "신청 후 언제부터 진행할 수 있나요?",
+    response: "신청하시면 문자서비스 가입까지 평균 하루 소요되며, 설정이 완료되면 바로 진행됩니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "마무리",
+    category: "신청방법",
+    question: "문자서비스는 어떻게 신청하나요?",
+    response: "관리자 페이지에서 본인 인증 후 신청 가능합니다.<br><br>자동 발송 문자 설정 메뉴에서 서비스 신청을 클릭한 다음, 휴대폰 본인 인증을 클릭해서 이용 중인 통신사를 선택하고 문자 SMS 인증 방법으로 진행해주시면 됩니다.<br>비용은 건당 단문 20원, 장문 40원이며 최초에는 선결제 방식으로 부가세 포함 11,000원 충전해주시면 됩니다.<br>이후 비용이 소진되면 후불로 정산 금액에서 자동으로 11,000원씩 차감됩니다."
+  },
+  {
+    topCategory: "리뷰 프로모션",
+    scenario: "마무리",
+    category: "마무리인사",
+    question: "상담 완료 후 마무리 인사",
+    response: "(신청한 경우)<br>대표님, 리뷰 보상 1건당 00원, 월 예산 한도 00원으로 신청 접수 되었습니다.<br>프로모션 효과를 최대한 보실 수 있도록 지속적으로 모니터링하겠습니다. 신청해 주셔서 감사합니다.<br><br>(미신청한 경우)<br>대표님, 우선 이번에는 진행하지않는 걸로 하겠습니다.<br>다만, 안내드린 것처럼 리뷰 프로모션은 예약률을 높이는 가장 기초적인 솔루션 중 하나 입니다.<br>한 번 더 고민해 보시고, 필요하시면 언제든 말씀 주세요. 감사합니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "도입",
+    "category": "탐색질문",
+    "question": "광고가 무엇인가요?",
+    "response": "광고란 채널에 비용을 투자하여 일정 기간 동안 리스트 상단에 노출되거나, 광고 지면에 배치되면서 고객한테 노출을 늘릴수있는 마케팅입니다.<br><br>예를 들어, 여기어때는 앱에 접속해 펜션 카테고리에서 지역을 선택하면, 광고 상품이 최상단에 보여지고 그 아래에 광고를 진행하지않는 일반 상품이 노출되는 구조입니다.<br>고객들은 펜션을 찾을 때 상위 리스트에서 선택할 확률이 높기 때문에, 광고를 진행하는 업체들이 자연스럽게 우선적인 후보에 오르게 됩니다.<br><br>반면, 광고없이 하단에 위치한 업체들은 경쟁에서 밀릴 가능성이 큽니다.<br><br>그래서 매출을 올리기 위해서는 광고를 통해 고객에게 노출을 늘리고 예약할 확률을 높이는 것이 효과적입니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "도입",
+    "category": "효과",
+    "question": "왜 광고를 하면 매출이 늘어나나요?",
+    "response": "광고를 하면 매출이 늘어나는 이유는 경쟁 펜션들 사이에서 먼저 노출되면서 고객이 우리 펜션을 클릭할 가능성이 높아지기 때문입니다.<br>이렇게 클릭이 많아질수록 예약으로 이어질 확률도 자연스럽게 늘어납니다.<br>쉽게 말해, 고객이 ‘가평 펜션’을 검색했을 때 1위~20위에 노출된 펜션들은 50~70위에 있는 펜션들보다 훨씬 더 많은 노출과 클릭을 받게되고, 반면에 검색 결과에서 이보다 더 아래에 있는 펜션들은 클릭조차 되기 어려워 고객의 선택을 받을 기회가 줄어들게 됩니다.<br><br>결국 광고를 하면 즉각적으로 더 많은 고객에게 노출되면서 클릭이 늘어나고, 클릭이 많아질수록 예약으로 이어지는 선순환 구조가 만들어집니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "도입",
+    "category": "효과",
+    "question": "광고를 하면 효과가 있나요?",
+    "response": "광고를 진행하면 노출이 늘어나면서 자연스럽게 클릭률과 예약률도 함께 많아집니다.<br>실제 데이터를 보면, 1월에 광고를 진행한 펜션들의 평균 거래액이 광고를 하지 않은 펜션보다 350% 이상 높았습니다.<br><br>특히, 대표님 펜션이 경쟁 펜션보다 가격 경쟁력이 있고 리뷰가 좋다면, 광고를 통해 예약이 더욱 늘어날 가능성이 큽니다.<br>광고 효과를 높이려면 가격과 리뷰 상태를 점검하는 것이 중요하며, 이 부분이 준비되었다면 광고 진행을 적극 추천드립니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "도입",
+    "category": "탐색질문",
+    "question": "광고 진행이 필수인가요?<br>광고를 하지 않으면 노출이 안되나요?",
+    "response": "광고를 진행하지 않는다고 해서 완전히 노출이 안 되는 것은 아닙니다.<br>하지만 최근 주요 채널들이 광고를 진행하는 펜션들에게 더 많은 노출과 혜택을 제공하는 방향으로 정책을 변경하고 있습니다.<br><br>예를 들어, 야놀자는 지난해부터 CPM 광고를 도입했고, 여기어때는 올해 광고 구좌를 무제한으로 열었습니다.<br>또한, 네이버도 하루 광고 예산 한도를 상향 조정하면서 이런 흐름이 모든 채널로 확대되고 있습니다.<br><br>이렇게 되면 광고를 진행하는 펜션은 더 많은 고객에게 노출될 기회를 얻지만, 광고를 하지 않는 경우 상대적으로 노출이 줄어들 가능성이 높아집니다.<br>즉, 이제는 가격이나 서비스만으로 경쟁하기 어려운 환경이 되었고, 적극적으로 광고를 활용해 노출을 늘리고 매출을 높이는 전략이 꼭 필요한 시점입니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "도입",
+    "category": "탐색질문",
+    "question": "어떤 광고를 해야하나요?",
+    "response": "광고를 진행하기 전에 최대한 효과를 낼 수 있도록 적절한 채널 수와 채널을 신중하게 선정하는 것이 중요합니다.<br>맞춤 컨설팅을 통해 대표님 펜션에 가장 적합한 광고 전략을 도와드리겠습니다.<br><br>첫 번째로, 광고 채널 수를 정해야 하는데요. 객실 규모에 맞춰 선택하는 것이 가장 효과적입니다.<br>📌추천 기준: 객실 7개 이하 – 1개 채널 / 8~15개 – 2개 채널 / 16개 이상 – 3개 채널<br>(객실 수 확인 후 안내)<br>현재 객실 수가 [OO]개로 확인되어 [O]개 채널 진행을 추천드립니다.<br><br>두 번째로, 광고 채널을 신중하게 선정해야 하는데요. 최근 30일 이내의 긍정적인 리뷰 개수와 주요 키워드 순위가 중요한 기준이 됩니다.<br>(최근 30일 이내 리뷰 수 및 내용 확인 후 안내)<br>현재 [OO] 채널이 가장 최신 리뷰가 많이 쌓여 있어, 해당 채널에서 광고를 진행하는 것이 가장 효과적일 것으로 추천드립니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "도입",
+    "category": "탐색질문",
+    "question": "광고 진행 기간은 어떻게 되나요?",
+    "response": "평균적으로 광고는 최소 1개월 단위로 시작하며, 길게는 3개월 또는 6개월 단위로 진행하는 경우가 많습니다.<br>광고 효과를 장기적으로 극대화하려면 최소 3개월 이상 진행하는 것을 추천드리지만, 대표님 예산에 맞춰 선택하실 수 있습니다.<br><br>단기적으로 광고를 원하시면 월 단위로 진행할 수 있으며, 정기적으로 광고 비용을 집행할 계획이 있으시다면 3개월 또는 6개월 단위로 진행하는 ‘플러스 상품’ 가입을 추천드립니다.<br>플러스 상품을 활용하면 비용 대비 효율을 높일 수 있으며, 안정적인 매출이 늘어나는 효과를 기대할 수 있습니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "도입",
+    "category": "탐색질문",
+    "question": "단기광고(스팟광고)는 무엇인가요?",
+    "response": "단기 광고는 정기적으로 광고를 진행하기보다, 특정 시기나 상황에 맞춰 유연하게 운영하고 싶을 때 적합한 광고입니다.<br>1개월 단위로 진행 가능하며, 매월 초 문자로 발송되는 광고 구매 페이지를 통해 신청하실 수 있습니다.<br>만약 해당 시기를 놓치셨다면, 별도로 접수해 주시면 가능 여부 확인 후 확정 안내드리고 있습니다.<br><br>매달 광고 비용 투자가 부담스럽거나, 정기 광고를 결정하기 전에 광고 효과를 먼저 테스트해보고 싶다면 단기 광고를 이용해보시는 것을 추천드립니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "도입",
+    "category": "탐색질문",
+    "question": "정기광고(플러스상품)는 무엇인가요?",
+    "response": "정기 광고는 매달 광고 비용을 효율적으로 사용하고 싶거나, 정기적인 광고 투자를 계획하고 계신 경우에 적합한 광고입니다.<br>플러스 상품을 계약하시면 진행 가능하며, 3개월 또는 6개월 단위로 운영됩니다.<br><br>가장 큰 장점은 매달 따로 결제할 필요 없이 비용이 자동으로 정산 차감되기 때문에, 번거로움 없이 광고를 운영할 수 있다는 점입니다.<br>또한, 광고 채널 선정도 트립일레븐에서 매월 효율을 확인해 최적의 채널을 선택하고, 신청까지 대신 진행해드립니다.<br><br>쉽게 말해, 매달 광고 채널과 상품 선택에 대한 고민 없이, 자동으로 최적화된 광고를 운영할 수 있습니다.<br>가입한 3개월 또는 6개월 기간이 종료된 후에도 별도의 해지 요청이 없으면 자동 연장되어 지속적으로도 이용 가능합니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "도입",
+    "category": "탐색질문",
+    "question": "단기광고와 정기광고의 차이점이 있나요?<br>플러스상품에 혜택이 있나요?",
+    "response": "차이점은 크게 두 가지입니다.<br><br>첫 번째는 광고 운영 방식입니다.<br>단기 광고는 한 달 단위로 진행되며, 매월 별도로 신청하고 결제를 해주셔야 합니다.<br>반면, 정기 광고는 3개월 또는 6개월 단위로 운영되며, 매월 일정 금액이 정산 차감되어 자동으로 진행됩니다.<br>또한, 정기 광고는 매월 광고 효율을 분석하여 가장 효과적일 수 있는 채널로 배정되기 때문에, 별도로 신경 쓰지 않고 광고 운영이 가능합니다.<br><br>두 번째는 구매 대행 수수료 차이입니다.<br>단기 광고는 광고 구매 시 결제 금액의 3%가 구매 대행 수수료로 부과됩니다.<br>반면, 정기 광고는 상시로 진행되는 상품이기 때문에, 수수료 없이 전액 광고 비용으로 활용할 수 있는 혜택이 제공됩니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "도입",
+    "category": "탐색질문",
+    "question": "구매 대행 수수료는 얼마이며, 무엇인가요?",
+    "response": "구매 대행 수수료는 광고 결제 금액에서 3%가 추가되어 결제됩니다.<br>예를 들어, 100,000원의 광고를 구매하시면 대행 수수료를 포함하여 총 103,000원이 결제되는 구조입니다.<br><br>📌 구매 대행 수수료가 발생하는 이유는, 최근 광고 구매 기능을 개발하여 대표님들의 구매 편의성을 높였지만, 이에 따라 신청 건수가 증가하면서 광고 집계 및 채널 협의 등 운영 리소스가 크게 늘어났기 때문입니다.<br>이러한 관리 비용을 반영하여 부득이하게 수수료가 부과되는 점 양해 부탁드립니다.<br><br>대신, 정기 광고인 플러스상품을 가입하시면 구매 대행 수수료가 면제되므로 보다 효율적인 광고 운영이 가능합니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "도입",
+    "category": "효과",
+    "question": "광고를 진행하면 혜택이 있나요?",
+    "response": "광고를 진행하면 단순히 고객에게 노출이 늘어나는 것뿐만 아니라, 채널에서 고객이 추가 할인을 받을 수 있는 선착순 쿠폰이 자동 발급됩니다.<br><br>광고 상품과 금액에 따라 다르지만, 평균적으로 광고 비용의 20%~25%가 쿠폰으로 발급되며, 최대는 45%까지 적용되는 광고도 있습니다.<br>예를 들어, 50만 원 광고에 쿠폰 발급률이 30%라면, 고객들에게 15만 원 상당의 쿠폰이 발급된다고 보시면 됩니다.<br><br>이 쿠폰은 대표님 부담 없이 광고에 대한 추가 혜택으로 제공되며, 고객이 광고를 보고 클릭했을 때 추가 할인 쿠폰을 다운받아 예약까지 이어질 가능성이 더욱 높아집니다.<br><br>다만, 광고 상품에 따라 일부는 쿠폰 발급 대상에서 제외될 수 있습니다. (예: 야놀자 CPM 라이트, 야놀자 검색 광고 등)"
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(공통)",
+    "category": "비용",
+    "question": "광고 비용은 얼마인가요?",
+    "response": "📌 비용은 [채널 수]와 [채널 선정]이 완료된 후 안내 필요<br>만약 아직 결정되지 않았다면, [도입 > 질문 : 어떤 광고를 해야 하나요?] 안내 후 이어서 진행.<br><br>광고 비용은 광고 등급에 따라 달라지는데, 대표님께서 고려하고 계신 예산 범위가 있을까요?<br>(예산과 선정된 채널의 단가표를 확인 후 안내)<br><br>현재 대표님께서 고려하시는 예산은 [OO]원이므로, [OO]채널의 [OO]광고 진행이 가능합니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(공통)",
+    "category": "운영방식",
+    "question": "광고 구좌(등급)가 무엇인가요?",
+    "response": "구좌(등급)은 채널에서 노출되는 광고의 순위나 등급을 의미합니다. 각 채널마다 구좌별 노출 방식이 다르게 운영됩니다.<br><br>📌 여기어때 구좌 구성은 ✅ S > A > B > C 순으로 노출되며, S구좌가 가장 높은 순위에 노출됩니다. 예를 들어, [가평] 지역의 [B]구좌가 715,000원이라면, 한 단계 높은 [A]구좌는 891,000원으로 구좌에 따라 가격과 순위가 결정됩니다.<br><br>📌 야놀자 광고 등급 구성은 ✅ 노출수 구간별로 라이트 > 베이직 > 스탠다드 > 프로 > 울트라로 구분되며, 상위 등급일수록 노출수가 많아집니다.<br>예를 들어, [가평] 지역의 [라이트] 등급이 647,900원이라면, 한 단계 높은 [베이직] 등급은 1,036,640원으로 등급에 따라 노출량이 달라집니다.<br><br>즉, 구좌(등급)를 높일수록 광고비가 상승하지만, 더 높은 노출과 광고 효과를 기대할 수 있습니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(공통)",
+    "category": "비용",
+    "question": "광고 비용이 부담스러워요.",
+    "response": "광고는 투자 대비 효과가 높은 마케팅 방법 중 하나입니다.<br>현재 경쟁 펜션들이 광고를 적극적으로 진행하고 있기 때문에, 광고 없이 운영하면 상대적으로 노출이 줄어들어 경쟁에서 밀려날 가능성이 높습니다.<br><br>처음부터 큰 비용을 투자하기 부담스럽다면, 작은 비용으로 시작해보고 점진적으로 광고 순위나 채널을 늘려가는 것도 좋은 방법입니다.<br>광고는 최소 1개월 단위로도 진행할 수 있기 때문에, 부담되지 않는 선에서 한 번 시도해보시는 건 어떨까요?<br>직접 광고 효과를 경험해보시면, 이후 광고 전략을 더욱 정확하게 계획하실 수 있습니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(공통)",
+    "category": "비용",
+    "question": "객실 요금이 이미 낮은데 광고까지하기 부담스러워요.",
+    "response": "준비중입니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(공통)",
+    "category": "비용",
+    "question": "광고 비용 할인이 되나요?",
+    "response": "📌 선정한 광고 채널이 야놀자가 아닌 경우<br>현재 네이버와 여기어때는 광고 비용 할인이 어렵습니다.<br>다만, 여기어때는 장기 구매 할인 협의를 진행 중이며, 도입되면 추가 혜택이 제공될 예정입니다.<br><br>비용 절감 방법으로는 정기적으로 광고를 운영하실 계획이라면, ‘플러스 상품’ 계약을 통해 광고 구매 대행 수수료를 면제받는 것을 추천드립니다.<br>이를 통해 광고 비용을 효율적으로 활용하면서 장기적으로 안정적인 운영이 가능합니다.<br><br>📌 선정한 광고 채널이 야놀자인 경우<br>야놀자는 90일 단위로 장기 구매하면 광고 비용의 10% 할인 혜택이 제공됩니다.<br>야놀자 장기 구매 할인이 적용된 비용으로 안내해드릴까요?"
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(공통)",
+    "category": "비용",
+    "question": "정기광고(플러스상품) 잔액은 소진되나요?",
+    "response": "미사용된 예산은 소진되지 않고 누적됩니다.<br>누적된 예산은 차후 광고 운영 시 사용할 수 있습니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(공통)",
+    "category": "운영방식",
+    "question": "정기광고(플러스상품)는 어느 채널로 진행되는지 알 수 있나요?",
+    "response": "네, 가능합니다.<br>진행할 광고가 확정되면 문자로 채널명, 상품명, 금액, 시행일을 발송해드립니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(공통)",
+    "category": "운영방식",
+    "question": "1개 채널로만 계속 진행할 수 있나요?",
+    "response": "매월 광고 구매 페이지 링크를 통해 시기에 맞춰 신청하는 단기 광고는 가능합니다.<br><br>📌 다만, 정기 광고는 3개월 또는 6개월 단위로 운영되며, 매월 광고 효율을 분석한 후 최적의 채널을 선정하기 때문에 1개 채널을 고정하는 것은 어렵습니다.<br><br>📌 효율적인 광고 운영을 위해서는 특정 채널을 고정하기보다는, 결과에 따라 최적의 채널로 유연하게 변경하는 것이 중요합니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(공통)",
+    "category": "비용",
+    "question": "비싼 광고만 효과가 좋은가요?",
+    "response": "비싼 광고만 효과가 좋은 것은 아닙니다. 중요한 것은 펜션의 상황에 맞는 최적의 광고를 선택하는 것입니다.<br><br>물론, 광고비가 높은 상품은 노출량과 순위 측면에서 유리하지만, 모든 숙소에 꼭 맞는 것은 아닙니다.<br>가격 경쟁력, 리뷰 상태 등을 고려하여 효율이 좋은 광고를 선택하는 것이 더 효과적입니다.<br><br>예산이 부담된다면 한 달 단위로 부담 없는 광고부터 시작하여 효과를 보시는 것도 좋은 방법입니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "도입",
+    "category": "효과",
+    "question": "광고를 중단하면 바로 효과가 떨어지나요?",
+    "response": "광고를 중단한다고 해서 효과가 즉시 사라지는 것은 아닙니다.<br>다만, 야놀자와 여기어때 같은 채널에서는 광고를 진행하는 펜션이 상위 노출에서 고객에게 먼저 눈에 띄는 유리한 구조이기 때문에, 장기적으로 운영할수록 더 안정적인 예약 흐름을 유지할 수 있습니다.<br><br>그래도 한 달 단위로도 효과를 확인할 수 있으니, 부담되지 않는 선에서 먼저 진행해보시는 건 어떨까요?"
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(공통)",
+    "category": "운영방식",
+    "question": "광고 신청 후 변경이나 취소가 가능한가요?",
+    "response": "광고 신청 시, 해당 내용이 채널로 접수되므로 변경이나 취소는 불가능합니다.<br>신청 전에 광고 기간, 예산, 채널 등을 신중하게 확인 부탁드립니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(네이버)",
+    "category": "탐색질문/비용",
+    "question": "네이버 광고는 어디에 나오나요?",
+    "response": "네이버 플레이스 광고는 통합검색에서 ‘OO펜션’과 같은 키워드를 검색했을 때, [펜션 실시간 예약] 영역의 상단에 노출되는 광고입니다.<br><br>📌 노출되는 키워드는 펜션과 연관도가 높은 키워드와 매칭되어 노출됩니다.<br>예를 들어, [지역 + 펜션] 또는 [지역 + 테마 + 펜션]과 같은 키워드가 해당됩니다.<br><br>📌 펜션을 찾는 고객들이 네이버에서 키워드를 검색한 후, 상단에 노출된 숙소를 우선적으로 탐색합니다.<br>즉, 목록에서 상단에 위치할수록 클릭될 확률이 높아지기 때문에, 플레이스 광고는 특정 지역의 펜션을 찾는 고객에게 업체를 적극적으로 홍보할 수 있는 효과적인 광고입니다.<br><br>특히, 네이버 리뷰가 좋다면 고객의 신뢰도가 더욱 높아지고, 예약으로 이어질 가능성이 커지기 때문에 더욱 추천드립니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(네이버)",
+    "category": "탐색질문/비용",
+    "question": "네이버 광고 노출 순위는 어떻게 결정되나요?",
+    "response": "플레이스 광고의 노출 순위는 입찰가 방식으로 운영되며, 검색 키워드와 입찰가에 따라 광고 순위가 결정됩니다.<br>예를 들어, A펜션의 입찰가가 900원이라면, 더 높은 노출을 원할 경우 900원보다 높은 입찰가를 설정해야 하는 구조입니다.<br>즉, 광고 입찰 경쟁에 따라 순위가 실시간으로 반영됩니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(네이버)",
+    "category": "탐색질문/비용",
+    "question": "네이버 광고는 얼마인가요?",
+    "response": "네이버 광고는 입찰가 경쟁 방식이기때문에 비용은 정해져있진않습니다. 대표님께서 고려하고 계신 예산 범위가 있을까요?<br>(예산과 선정된 채널의 단가표를 확인 후 안내)<br><br>현재 대표님께서 고려하시는 예산은 [OO]원이므로, 네이버 플레이스광고 [OO] 진행이 가능합니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(야놀자)",
+    "category": "탐색질문/비용",
+    "question": "야놀자 광고는 어디에 나오나요?",
+    "response": "야놀자 광고는 크게 CPM 광고와 검색 광고, 두 가지로 나뉩니다.<br><br>📌 CPM 광고<br>야놀자의 프로그램이 고객이 자주 찾는 화면을 분석하여, 가장 효과적인 광고 지면에 유동적으로 노출해주는 상품입니다.<br>대표적인 노출 위치는 상단 배너 광고 영역인 ‘야놀자 초이스+’ 지면과 검색 결과 영역입니다.<br><br>CPM 광고는 항상 고정 노출되는 방식이 아니며, 광고 등급에 따라 노출 횟수가 달라집니다.<br>예를 들어, A 상품은 100번 노출된다면, 가격이 더 높은 B 상품은 200번 노출되는 방식입니다.<br>고객이 자주 방문하는 화면에 자동으로 광고가 배치되므로 높은 노출 효과를 기대할 수 있는 광고입니다.<br><br>📌 검색 광고<br>검색 광고는 키워드 검색결과 상단 영역에 숙소를 노출하는 방식입니다.<br>예를 들어, ‘OO펜션’과 같은 키워드를 검색하면, 해당 키워드와 관련된 숙소가 검색 상단에 노출됩니다.<br>시즌에 따라 다르지만, 주 단위로 구매 가능하여 CPM 광고보다 비교적 합리적인 비용으로 진행할 수 있어 예산을 고려하는 경우 적합한 선택이 될 수 있습니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(야놀자)",
+    "category": "탐색질문/비용",
+    "question": "야놀자 광고 노출 순위는 어떻게 결정되나요?",
+    "response": "야놀자 CPM 광고는 노출 순위가 아닌 구매한 광고 가격이 높은 상품일수록 최소 노출수가 높으므로 상위에 자주 노출될 가능성이 큽니다. 야놀자의 노출 로직에 따라 예상 노출수에 맞춰 광고가 롤링되며, 새로고침하거나 재검색 시 노출됩니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(야놀자)",
+    "category": "탐색질문/비용",
+    "question": "야놀자 광고는 얼마인가요?",
+    "response": "야놀자 광고 비용은 광고 등급에 따라 달라지는데, 대표님께서 고려하고 계신 예산 범위가 있을까요?<br>(예산과 선정된 채널의 단가표를 확인 후 안내)<br><br>현재 대표님께서 고려하고 계시는 예산은 [OO]원이므로, [OO]채널의 [OO]상품 광고 진행이 가능합니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(여기어때)",
+    "category": "탐색질문/비용",
+    "question": "여기어때 광고는 어디에 나오나요?",
+    "response": "여기어때는 상단 광고를 통해 지역 내 상위 노출이 가능합니다.<br><br>📌 노출 위치는 여기어때 앱에서 카테고리를 클릭 후 지역을 클릭하면 나오는 리스트의 상단에 노출됩니다.📌 노출 순위는 구좌에 따라 다르며, 최근 개편 이후 다음과 같이 운영됩니다.<br>✅ S구좌: 1~10위까지 순위가 고정되는 방식으로 운영되며, 구좌 확보 가능 여부 확인이 필요합니다.<br>✅ A~C구좌: 무제한 구좌로 변경되었으며, 동일 구좌 내에서는 가점 순으로 노출이 결정됩니다.<br><br>📌동일 구좌 내 가점 요소는 광고 등급, 잔여 인벤토리, 리뷰 평점 등의 요소에 따라 가점이 부여되며, 이에 따라 노출 순위가 결정됩니다.<br><br>📌 캠핑 카테고리의 경우에는 고정 순위 방식이며, 보유 구좌에 한해 판매하기때문에 매월 변동됩니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(여기어때)",
+    "category": "탐색질문/비용",
+    "question": "여기어때 광고 노출 순위는 어떻게 결정되나요?",
+    "response": "답변 준비중입니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(여기어때)",
+    "category": "탐색질문/비용",
+    "question": "여기어때 광고는 얼마인가요?",
+    "response": "여기어때 광고 비용은 광고 등급에 따라 달라지는데, 대표님께서 고려하고 계신 예산 범위가 있을까요?<br>(예산과 선정된 채널의 단가표를 확인 후 안내)<br><br>현재 대표님께서 고려하고 계시는 예산은 [OO]원이므로, [OO]채널의 [OO]구좌 광고 진행이 가능합니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(공통)",
+    "category": "반론",
+    "question": "이전에 광고했는데, 효과가 없었어요",
+    "response": "이전에 광고 효과가 낮았던 원인은 네 가지 요소를 점검하는 것이 중요합니다.<br><br>📌 첫 번째, 최신 리뷰와 긍정적인 리뷰 확보 여부입니다.<br>최신 리뷰가 부족하거나 부정적인 리뷰가 많으면 고객 신뢰도가 낮아져 예약으로 이어지기 어렵습니다.<br><br>📌 두 번째는 채널 특가 진행 여부입니다.<br>고객은 추가 할인이나 혜택이 있는 펜션을 선호하기 때문에, 추가 혜택이 없었다면 광고 효과가 낮았을 가능성이 큽니다.<br><br>📌 세 번째는 시장가입니다.<br>비슷한 조건의 펜션이 있다면 고객은 더 합리적인 가격의 숙소를 선택하기 때문에, 시장가 대비 경쟁력이 있었는지 점검이 필요합니다.<br><br>📌 네 번째는 적합한 광고 채널과 상품 선택 여부입니다.<br>광고비를 투자했더라도 적절한 채널과 상품이 아니었다면 실제 예약으로 이어지기 어렵습니다.<br><br>📌 이번에는 이 네 가지 요소를 점검하고, 효과를 낼 수 있는 광고 상품을 추천드릴 테니 한 번 시도해보시는 건 어떨까요?"
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(공통)",
+    "category": "반론",
+    "question": "트립일레븐 수수료에 광고 비용이 포함되어있는거 아닌가요?",
+    "response": "트립일레븐의 수수료와 광고 비용은 별개입니다.<br><br>트립일레븐의 계약 수수료는 시스템 대여 및 총판 서비스 비용이며, 광고 비용은 추가적인 노출을 원할 경우 선택적으로 진행하는 부분입니다.<br>광고는 노출률을 높이고, 예약을 더 많이 유도하기 위한 별도의 마케팅 투자 개념으로 보시면 됩니다.<br><br>저도 물론 대표님 비용 부담 없이 펜션의 매출이 늘어났으면 좋겠지만, 최근 주요 채널들이 광고를 진행하는 펜션들에게 더 많은 노출과 혜택을 제공하는 방향으로 정책을 변경하고 있습니다.<br><br>이렇게 되면 광고를 진행하는 펜션은 더 많은 고객에게 노출될 기회를 얻지만, 광고를 하지 않는 경우 상대적으로 노출이 줄어들 가능성이 높아집니다.<br><br>즉, 이제는 가격이나 서비스만으로 경쟁하기 어려운 환경이 되었고, 적극적으로 광고를 활용해 노출을 늘리고 매출을 높이는 전략이 꼭 필요한 시점이기때문에 제안드리게 되었습니다.<br><br>❗수긍하지않는 경우 추가 답변<br>광고 비용이 부담스러우시다면, 비교적 비용 부담이 적은 리뷰 프로모션 또는 채널 특가를 진행해보시는 건 어떨까요?<br><br>✅ 리뷰 프로모션은 월 한도를 두고, 리뷰를 작성한 고객에게 보상을 제공하는 프로모션입니다. [리뷰 프로모션 FAQ로 이동하여 이어서 안내]<br><br>✅ 채널 특가는 특정 기간 동안 채널 할인을 적용하여 기획전 배너 노출 혜택을 받을 수 있는 프로모션입니다.<br><br>이 두 가지는 선결제 방식이 아니라, 리뷰를 작성하거나 예약이 발생했을 때만 비용이 적용되는 마케팅 방식이므로, 부담을 줄이면서도 효과적인 홍보가 가능합니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(공통)",
+    "category": "반론",
+    "question": "광고 비용은 트립일레븐에서 부담해야하는거 아닌가요?",
+    "response": "저희는 펜션 운영을 위한 예약 시스템을 대여하고, 총판 서비스 제공을 통해 예약 활성화를 돕는 역할을 하고 있습니다.<br>반면, 광고는 노출과 예약률을 높이기 위한 추가적인 마케팅 솔루션 중 하나로, 개별 펜션의 선택 사항이며, 트립일레븐에서 별도로 부담하기는 어려운 부분입니다.<br><br>📌 다만, 더 많은 기회를 제공해드리기 위해, 저희도 지속적으로 채널과 협의하여 기획전, 프로모션 등 다양한 마케팅 환경을 만들고 확대하는 데 주력하고 있습니다.<br><br>❗수긍하지않는 경우 추가 답변<br>저도 물론 대표님 비용 부담 없이 펜션의 매출이 늘어났으면 좋겠지만, 최근 주요 채널들이 광고를 진행하는 펜션들에게 더 많은 노출과 혜택을 제공하는 방향으로 정책을 변경하고 있습니다.<br><br>이렇게 되면 광고를 진행하는 펜션은 더 많은 고객에게 노출될 기회를 얻지만, 광고를 하지 않는 경우 상대적으로 노출이 줄어들 가능성이 높아집니다.<br><br>❗수긍하지않는 경우 추가 답변<br>광고 비용이 부담스러우시다면, 비교적 비용 부담이 적은 리뷰 프로모션 또는 채널 특가를 진행해보시는 건 어떨까요?<br><br>✅ 리뷰 프로모션은 월 한도를 두고, 리뷰를 작성한 고객에게 보상을 제공하는 프로모션입니다. [리뷰 프로모션 FAQ로 이동하여 이어서 안내]<br><br>✅ 채널 특가는 특정 기간 동안 채널 할인을 적용하여 기획전 배너 노출 혜택을 받을 수 있는 프로모션입니다.<br><br>이 두 가지는 선결제 방식이 아니라, 리뷰를 작성하거나 예약이 발생했을 때만 비용이 적용되는 마케팅 방식이므로, 부담을 줄이면서도 효과적인 홍보가 가능합니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "상담진행(공통)",
+    "category": "운영방식",
+    "question": "광고 효과를 높이려면 어떻게 해야 하나요?",
+    "response": "광고 효과를 높이려면 세 가지를 점검해야 합니다.<br><br>✅ 첫째로, 최신 리뷰와 긍정적인 리뷰 확보입니다.<br>최신 리뷰가 많을수록 광고 효과와 예약 전환율이 높아지는데, 트립일레븐의 리뷰 프로모션을 활용하면 리뷰를 빠르게 모을 수 있습니다.<br><br>✅ 둘째는, 채널 특가 진행입니다.<br>추가 할인이나 혜택이 있는 숙소는 고객에게 매력적으로 느껴지는데, 채널 특가를 활용하면 노출 효과가 커집니다.<br><br>✅ 셋째는 가격 경쟁력입니다.<br>비슷한 숙소 중 고객은 더 합리적인 가격을 선택하기때문에 시장가를 체크해서 경쟁력 있는 가격을 갖춰야합니다.<br><br>이 세가지를 같이 점검해서 광고 효과를 높이는게 어떨까요?"
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "마무리",
+    "category": "운영방식",
+    "question": "광고 언제부터 시작할 수 있어요?",
+    "response": "광고 송출 시점은 신청과 비용 결제가 완료된 시점에 따라 결정됩니다.<br>평균적으로 결제 완료 후 1~2주 내로 송출 가능합니다. 다만, 채널별로 일정이 다를 수 있습니다.<br><br>✅ 매월 초 발송되는 문자의 광고 구매 페이지에서 신청하면, 다음달 초부터 송출 시작합니다.<br>✅ 만약 신청 시기를 놓치셨다면 지금 접수해주시면 가능 여부와 시점 확인 후 안내드리겠습니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "마무리",
+    "category": "신청방법",
+    "question": "제가 직접 채널로 광고 신청해도되나요?",
+    "response": "트립일레븐을 통해 채널을 운영 중이시기 때문에, 직접 신청이 아닌 트립일레븐을 통해 접수해 주시면 진행 도와드리겠습니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "마무리",
+    "category": "신청방법",
+    "question": "광고 비용 결제 방법이 어떻게 되나요?",
+    "response": "준비중입니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "마무리",
+    "category": "운영방식",
+    "question": "광고 비용 세금계산서 발행되나요?<br>광고 비용은 세금 신고할 때 비용 처리 되나요?",
+    "response": "네, 세금계산서 발행됩니다.<br>광고 비용으로 결제 또는 정산 차감된 금액은 세금계산서 발행되며, 추후 세금 신고시 활용 가능합니다.<br><br>발행 내역은 관리자페이지의 [정산목록] 메뉴 확인 부탁드립니다."
+  },
+  {
+    "topCategory": "광고",
+    "scenario": "마무리",
+    "category": "신청방법",
+    "question": "광고 신청은 어떻게 하나요?",
+    "response": "준비중입니다."
+  }
+    ];
+    
+    // 왼쪽 사이드바 박스 클릭 시 활성화 처리 (글꼴 색은 변경 없이 배경색만 변경)
+    function selectSidebarItem(element) {
+      const container = element.parentElement;
+      container.querySelectorAll(".faq-item").forEach(box => box.classList.remove("active"));
+      element.classList.add("active");
+    }
+    
+    // 가운데 Question 영역 박스 클릭 시 활성화 처리 (기존 selectQuestion)
+    function selectQuestion(element, topCategory, scenario, category, questionText, responseText) {
+      const container = document.getElementById("questionSection");
+      const boxes = container.querySelectorAll(".faq-item");
+      boxes.forEach(box => box.classList.remove("active"));
+      element.classList.add("active");
+      displayQuestion(topCategory, scenario, category, questionText, responseText);
+    }
+    
+    // 컨테이너 내 vertical-line 높이를 동적으로 조정
+    function adjustVerticalLine(container) {
+      const verticalLine = container.querySelector('.vertical-line');
+      if (!verticalLine) return;
+      
+      const scenarioChildren = Array.from(container.children).filter(child => child.classList.contains('scenario'));
+      if (scenarioChildren.length > 0) {
+        const lastScenario = scenarioChildren[scenarioChildren.length - 1];
+        const targetHeight = lastScenario.offsetTop + (lastScenario.offsetHeight / 2);
+        verticalLine.style.height = targetHeight + "px";
+      } else {
+        const children = Array.from(container.children).filter(child => !child.classList.contains('vertical-line'));
+        let lastChild = null;
+        for (let i = children.length - 1; i >= 0; i--) {
+          if (children[i].offsetHeight > 0) {
+            lastChild = children[i];
+            break;
+          }
         }
-
-        function toggleCategories(scenario) {
-            const container = document.getElementById(`category-${scenario}`);
-
-            if (container.style.display === "block") {
-                container.style.display = "none";
-                container.innerHTML = '';
-            } else {
-                container.style.display = "block";
-                const categories = [...new Set(faqData.filter(item => item.scenario === scenario).map(item => item.category))];
-                container.innerHTML = categories.map(category => `<div class="faq-item category" onclick="renderQuestions('${scenario}', '${category}')">${category}</div>`).join('');
+        if (!lastChild && children.length > 0) {
+          lastChild = children[children.length - 1];
+        }
+        if (lastChild) {
+          verticalLine.style.height = (lastChild.offsetTop + (lastChild.offsetHeight / 2)) + "px";
+        } else {
+          verticalLine.style.height = "0px";
+        }
+      }
+      
+      const parentTreeContainer = container.parentElement.closest('.tree-children');
+      if (parentTreeContainer) {
+        adjustVerticalLine(parentTreeContainer);
+      }
+    }
+    
+    function renderTopCategories() {
+      const topContainer = document.getElementById("topCategoryContainer");
+      topContainer.innerHTML = '';
+      const topCategories = [...new Set(faqData.map(item => item.topCategory))];
+      topCategories.forEach(topCat => {
+        const treeNode = document.createElement("div");
+        treeNode.classList.add("tree-node");
+        
+        const topCategoryDiv = document.createElement("div");
+        topCategoryDiv.classList.add("faq-item", "top-category");
+        topCategoryDiv.textContent = topCat;
+        topCategoryDiv.onclick = function() {
+          selectSidebarItem(this);
+          const allContainers = document.querySelectorAll('[id^="tree-children-"]');
+          allContainers.forEach(cont => {
+            if (cont.id !== `tree-children-${topCat}` && cont.classList.contains("open")) {
+              cont.classList.remove("open");
+              setTimeout(() => { 
+                cont.innerHTML = ''; 
+                const vl = document.createElement("div");
+                vl.classList.add("vertical-line");
+                cont.appendChild(vl);
+              }, 500);
             }
-        }
-
-        function renderQuestions(scenario, category) {
-            const container = document.getElementById("questionSection");
-            const questions = faqData.filter(item => item.scenario === scenario && item.category === category);
-            container.innerHTML = questions.map(item => `<div class="faq-item" onclick="displayQuestion('${item.question}', '${item.response}')">${item.question}</div>`).join('');
-        }
-
-        function displayQuestion(questionText, responseText) {
-            document.getElementById("questionDisplay").innerHTML = `<p class="selected-question">${questionText}</p><p class="selected-response">${responseText}</p>`;
-        }
-
-        function toggleTooltip() {
-            const tooltip = document.getElementById("tooltip");
-            tooltip.classList.toggle("show");
-            setTimeout(() => {
-                tooltip.classList.remove("show");
-            }, 3000);
-        }
-
-        // 검색어 입력 시 question 항목을 필터링하는 함수 추가
-        function filterFAQ() {
-            const query = document.getElementById("search").value.trim().toLowerCase();
-            const container = document.getElementById("questionSection");
-            if (query === "") {
-                container.innerHTML = "";
-                return;
-            }
-            const results = faqData.filter(item => item.question.toLowerCase().includes(query));
-            if (results.length === 0) {
-                container.innerHTML = `<div class="faq-item">검색 결과가 없습니다.</div>`;
-            } else {
-                container.innerHTML = results.map(item => `<div class="faq-item" onclick="displayQuestion('${item.question}', '${item.response}')">${item.question}</div>`).join('');
-            }
-        }
-
-        renderScenarios();
-    </script>
+          });
+          this.classList.toggle('expanded');
+          toggleTopCategory(topCat);
+        };
+        treeNode.appendChild(topCategoryDiv);
+        
+        const childrenContainer = document.createElement("div");
+        childrenContainer.classList.add("tree-children");
+        childrenContainer.id = `tree-children-${topCat}`;
+        const verticalLine = document.createElement("div");
+        verticalLine.classList.add("vertical-line");
+        childrenContainer.appendChild(verticalLine);
+        
+        treeNode.appendChild(childrenContainer);
+        topContainer.appendChild(treeNode);
+      });
+    }
+    
+    function toggleTopCategory(topCat) {
+      const container = document.getElementById(`tree-children-${topCat}`);
+      if (container.classList.contains("open")) {
+        container.classList.remove("open");
+        setTimeout(() => { 
+          container.innerHTML = ''; 
+          const vl = document.createElement("div");
+          vl.classList.add("vertical-line");
+          container.appendChild(vl);
+        }, 500);
+      } else {
+        renderScenarios(topCat, container);
+        container.classList.add("open");
+        setTimeout(() => { adjustVerticalLine(container); }, 100);
+      }
+    }
+    
+    function renderScenarios(topCat, parentContainer) {
+      parentContainer.innerHTML = '';
+      const verticalLine = document.createElement("div");
+      verticalLine.classList.add("vertical-line");
+      parentContainer.appendChild(verticalLine);
+      
+      const scenarios = [...new Set(faqData.filter(item => item.topCategory === topCat).map(item => item.scenario))];
+      scenarios.forEach(scenario => {
+        const scenarioDiv = document.createElement("div");
+        scenarioDiv.classList.add("faq-item", "scenario");
+        scenarioDiv.textContent = scenario;
+        scenarioDiv.onclick = function() {
+          selectSidebarItem(this);
+          this.classList.toggle('expanded');
+          toggleCategories(topCat, scenario);
+        };
+        parentContainer.appendChild(scenarioDiv);
+        
+        const categoryContainer = document.createElement("div");
+        categoryContainer.classList.add("tree-children");
+        categoryContainer.id = `tree-category-${topCat}-${scenario}`;
+        const catVerticalLine = document.createElement("div");
+        catVerticalLine.classList.add("vertical-line");
+        categoryContainer.appendChild(catVerticalLine);
+        
+        parentContainer.appendChild(categoryContainer);
+      });
+      setTimeout(() => { adjustVerticalLine(parentContainer); }, 100);
+    }
+    
+    function toggleCategories(topCat, scenario) {
+      const container = document.getElementById(`tree-category-${topCat}-${scenario}`);
+      if (container.classList.contains("open")) {
+        container.classList.remove("open");
+        setTimeout(() => { 
+          container.innerHTML = ''; 
+          const vl = document.createElement("div");
+          vl.classList.add("vertical-line");
+          container.appendChild(vl);
+        }, 500);
+      } else {
+        renderCategories(topCat, scenario, container);
+        container.classList.add("open");
+        setTimeout(() => { adjustVerticalLine(container); }, 100);
+      }
+    }
+    
+    function renderCategories(topCat, scenario, parentContainer) {
+      parentContainer.innerHTML = '';
+      const verticalLine = document.createElement("div");
+      verticalLine.classList.add("vertical-line");
+      parentContainer.appendChild(verticalLine);
+      
+      const categories = [...new Set(faqData.filter(item => item.topCategory === topCat && item.scenario === scenario).map(item => item.category))];
+      categories.forEach(category => {
+        const catDiv = document.createElement("div");
+        catDiv.classList.add("faq-item", "category");
+        catDiv.textContent = category;
+        catDiv.onclick = function() {
+          selectSidebarItem(this);
+          renderQuestions(topCat, scenario, category);
+        };
+        parentContainer.appendChild(catDiv);
+      });
+      setTimeout(() => { adjustVerticalLine(parentContainer); }, 100);
+    }
+    
+    function renderQuestions(topCat, scenario, category) {
+      const container = document.getElementById("questionSection");
+      const questions = faqData.filter(item => item.topCategory === topCat && item.scenario === scenario && item.category === category);
+      // 가운데 영역 상단 텍스트 수정
+      container.innerHTML = "<p class='question-label'>2️⃣ 파트너 질문 선택</p>" + 
+        questions.map(item => 
+          `<div class="faq-item" onclick="selectQuestion(this, '${item.topCategory}', '${item.scenario}', '${item.category}', '${item.question}', '${item.response}')">
+             ${item.question}
+           </div>`
+        ).join('');
+    }
+    
+    function displayQuestion(topCategory, scenario, category, questionText, responseText) {
+      const breadcrumb = topCategory + " > " + scenario + " > " + category;
+      document.getElementById("questionDisplay").innerHTML =
+        `<p class="breadcrumb">${breadcrumb}</p>
+         <p class="selected-question"><strong>${questionText}</strong></p>
+         <p class="selected-response">${responseText}</p>`;
+    }
+    
+    function toggleTooltip() {
+      const tooltip = document.getElementById("tooltip");
+      tooltip.classList.toggle("show");
+      setTimeout(() => {
+        tooltip.classList.remove("show");
+      }, 3000);
+    }
+    
+    function filterFAQ() {
+      const query = document.getElementById("search").value.trim().toLowerCase();
+      const container = document.getElementById("questionSection");
+      if (query === "") {
+        container.innerHTML = "<p class='question-label'>2️⃣ 파트너 질문 선택</p>";
+        return;
+      }
+      const results = faqData.filter(item => item.question.toLowerCase().includes(query));
+      if (results.length === 0) {
+        container.innerHTML = "<p class='question-label'>2️⃣ 파트너 질문 선택</p><div class='faq-item'>검색 결과가 없습니다.</div>";
+      } else {
+        container.innerHTML = "<p class='question-label'>2️⃣ 파트너 질문 선택</p>" + 
+          results.map(item =>
+            `<div class="faq-item" onclick="selectQuestion(this, '${item.topCategory}', '${item.scenario}', '${item.category}', '${item.question}', '${item.response}')">
+               ${item.question}
+             </div>`
+          ).join('');
+      }
+    }
+    
+    renderTopCategories();
+  </script>
 </body>
 </html>
