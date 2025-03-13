@@ -168,18 +168,13 @@
       background: #d1d6dc;
       color: #000;
     }
-    
-    /* scenario, category 기본 스타일 */
-    .faq-item.scenario {
-      background: #b3d7ff;
-      border-bottom: 2px solid #ddd;
-      font-weight: bold;
-      color: #000;
+    /* 반론 카테고리: 연한 빨간색 배경 */
+    .faq-item.category.argument {
+      background: #ffcccc;
     }
-    .faq-item.category {
-      background: #f1f5fa;
-      padding-left: 15px;
-      font-weight: bold;
+    /* 반론 카테고리 active 상태: 진한 빨간색 배경 */
+    #sidebar .faq-item.category.argument.active {
+      background: #ff9999;
       color: #000;
     }
     
@@ -324,12 +319,12 @@
       padding: 20px 0 10px 0;
       border-bottom: 1px solid #ddd;
     }
-    /* iframe을 감싸는 네모 박스 */
+    /* iframe을 감싸는 네모 박스 - 테두리를 투명색으로 변경 */
     .iframe-container {
       width: 50%;
       height: calc(70% - 50px);
       margin: 20px auto;
-      border: 2px solid #ddd;
+      border: 2px solid transparent;
       border-radius: 5px;
       overflow: hidden;
     }
@@ -382,11 +377,11 @@
     </svg>
   </div>
   
-  <!-- 모달 (개선사항 접수를 위한 폼) -->
+  <!-- 모달 (FAQ 개선사항 접수하기) -->
   <div id="feedback-modal" class="modal">
     <div class="modal-content">
       <span class="modal-close" onclick="closeFeedbackModal()">&times;</span>
-      <h2 class="modal-title">FAQ 개선사항 요청하기</h2>
+      <h2 class="modal-title">FAQ 개선사항 접수하기</h2>
       <div class="iframe-container">
         <!-- 모달이 열릴 때마다 새 iframe을 생성합니다. -->
       </div>
@@ -1131,6 +1126,10 @@
       categories.forEach(category => {
         const catDiv = document.createElement("div");
         catDiv.classList.add("faq-item", "category");
+        // 만약 category가 '반론'이면 연한 빨간색 스타일을 적용하기 위해 'argument' 클래스를 추가합니다.
+        if (category === "반론") {
+          catDiv.classList.add("argument");
+        }
         catDiv.textContent = category;
         catDiv.onclick = function() {
           selectSidebarItem(this);
