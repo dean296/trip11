@@ -253,6 +253,86 @@
     .tooltip.show {
       display: block;
     }
+
+    /* 우측 하단 고정 우편 아이콘 */
+    #feedback-icon {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background-color: #007bff;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+    #feedback-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: #fff;
+    }
+
+    /* 모달 스타일 */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+      position: relative;
+      background-color: #fff;
+      margin: 5% auto;
+      padding: 0;
+      border: 1px solid #888;
+      width: 50%;
+      max-width: 800px;
+      height: 80%;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .modal-close {
+      color: #aaa;
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 1200;
+    }
+    .modal-close:hover,
+    .modal-close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    /* 모달 제목 스타일 */
+    .modal-title {
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      padding: 20px 0 10px 0;
+      border-bottom: 1px solid #ddd;
+    }
+    /* iframe을 감싸는 네모 박스 */
+    .iframe-container {
+      width: 50%;
+      height: calc(70% - 50px);
+      margin: 20px auto;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      overflow: hidden;
+    }
   </style>
 </head>
 <body>
@@ -293,6 +373,24 @@
     비용 : 단가, 가격, 금액, 판매가, 구매가, 결제가<br>
     단기광고 : 스팟광고, 한달광고<br>
     정기광고 : 플러스상품
+  </div>
+  
+  <!-- 우측 하단 고정 우편 아이콘 -->
+  <div id="feedback-icon" onclick="openFeedbackModal()">
+    <svg viewBox="0 0 24 24">
+      <path d="M20 4H4C2.9 4 2 4.9 2 6v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+    </svg>
+  </div>
+  
+  <!-- 모달 (개선사항 접수를 위한 폼) -->
+  <div id="feedback-modal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeFeedbackModal()">&times;</span>
+      <h2 class="modal-title">FAQ 개선사항 요청하기</h2>
+      <div class="iframe-container">
+        <!-- 모달이 열릴 때마다 새 iframe을 생성합니다. -->
+      </div>
+    </div>
   </div>
   
   <script>
@@ -1081,6 +1179,35 @@
                ${item.question}
              </div>`
           ).join('');
+      }
+    }
+    
+    // 모달 열기 함수 - 모달이 열릴 때마다 iframe 컨테이너를 초기화하여 새 iframe을 생성합니다.
+    function openFeedbackModal() {
+      const modal = document.getElementById("feedback-modal");
+      modal.style.display = "block";
+      const iframeContainer = modal.querySelector(".iframe-container");
+      // iframe 컨테이너 초기화
+      iframeContainer.innerHTML = "";
+      // 새 iframe 생성 및 설정
+      const iframe = document.createElement("iframe");
+      iframe.src = "https://chilipepper.io/form/burning-red-serrano-e573773a-16f7-486f-89b8-45c084cfeee2";
+      iframe.style.width = "100%";
+      iframe.style.height = "100%";
+      iframe.setAttribute("frameborder", "0");
+      iframeContainer.appendChild(iframe);
+    }
+    
+    // 모달 닫기 함수
+    function closeFeedbackModal() {
+      document.getElementById("feedback-modal").style.display = "none";
+    }
+    
+    // 모달 바깥 클릭 시 닫힘 처리
+    window.onclick = function(event) {
+      const modal = document.getElementById("feedback-modal");
+      if (event.target == modal) {
+        closeFeedbackModal();
       }
     }
     
