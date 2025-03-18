@@ -4,18 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FAQ 검색</title>
+  <!-- 나눔고딕 폰트 적용 -->
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" rel="stylesheet">
   <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-2JE7G3R8W1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-2JE7G3R8W1');
-</script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2JE7G3R8W1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-2JE7G3R8W1');
+  </script>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: 'Nanum Gothic', sans-serif;
       background-color: #f4f6f9;
       margin: 0;
       padding: 20px;
@@ -23,13 +24,21 @@
       height: 100vh;
     }
     
-    /* 기본 데스크탑 레이아웃 */
+    /* 왼쪽 사이드바: 입력 가능한 영역이 아님 */
     #sidebar {
       width: 20%;
       padding: 20px;
       border-right: 2px solid #ddd;
       overflow-y: auto;
       background: #ffffff;
+      user-select: none;
+      caret-color: transparent;
+    }
+    
+    /* 단, 내부의 input은 정상 입력 가능하도록 오버라이드 */
+    #sidebar input {
+      user-select: text;
+      caret-color: auto;
     }
     
     /* 가운데 Question 영역: 데스크탑에서 30%로 지정 (확대) */
