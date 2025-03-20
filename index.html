@@ -182,6 +182,11 @@
     .faq-item.subcategory {
       background: #f1f5fa;
     }
+    /* ----- 추가: faq-item subcategory.active 스타일 (faq-item category active expanded와 동일) ----- */
+    #sidebar .faq-item.subcategory.active {
+      background: #d1d6dc;
+      color: #000;
+    }
     .breadcrumb {
       font-size: 16px;
       color: #555;
@@ -422,7 +427,8 @@
   
   <script>
     // faqData 예시 (subCategory가 없는 항목과 있는 항목을 혼합)
-    const faqData = [
+    const faqData = [  
+
  {
     topCategory: "리뷰 프로모션",
     scenario: "도입",
@@ -1679,8 +1685,9 @@
         }
         catDiv.textContent = category;
         catDiv.onclick = function() {
-          selectSidebarItem(this);
-          // subCategory가 존재하는지 검사 (존재하면 서브 카테고리 토글, 없으면 바로 질문 렌더링)
+          // 기존에 active된 category와 subcategory 모두 제거
+          document.querySelectorAll('.faq-item.category.active, .faq-item.subcategory.active').forEach(item => item.classList.remove('active'));
+          this.classList.add('active');
           var hasSubCategory = faqData.some(item => item.topCategory === topCat && item.scenario === scenario && item.category === category && item.hasOwnProperty('subCategory') && item.subCategory !== "");
           if(hasSubCategory) {
             this.classList.toggle('expanded');
@@ -1742,7 +1749,9 @@
         subCatDiv.classList.add("faq-item", "subcategory");
         subCatDiv.textContent = subCategory;
         subCatDiv.onclick = function() {
-          selectSidebarItem(this);
+          // 기존에 active된 category와 subcategory 모두 제거
+          document.querySelectorAll('.faq-item.category.active, .faq-item.subcategory.active').forEach(item => item.classList.remove('active'));
+          this.classList.add('active');
           renderQuestions(topCat, scenario, category, subCategory);
         };
         parentContainer.appendChild(subCatDiv);
@@ -1770,31 +1779,41 @@
         ).join('');
     }
     
+    // ===== 수정된 adjustVerticalLine 함수 =====
     function adjustVerticalLine(container) {
       const verticalLine = container.querySelector('.vertical-line');
       if (!verticalLine) return;
       
-      const scenarioChildren = Array.from(container.children).filter(child => child.classList.contains('scenario'));
-      if (scenarioChildren.length > 0) {
-        const lastScenario = scenarioChildren[scenarioChildren.length - 1];
-        const targetHeight = lastScenario.offsetTop + (lastScenario.offsetHeight / 2);
+      // 만약 container 내에 expanded된 category가 있다면 해당 요소 기준으로 높이 계산
+      const expandedCategoryChildren = Array.from(container.children)
+        .filter(child => child.classList.contains('category') && child.classList.contains('expanded'));
+      if(expandedCategoryChildren.length > 0) {
+        const lastCategory = expandedCategoryChildren[expandedCategoryChildren.length - 1];
+        const targetHeight = lastCategory.offsetTop + (lastCategory.offsetHeight / 2);
         verticalLine.style.height = targetHeight + "px";
       } else {
-        const children = Array.from(container.children).filter(child => !child.classList.contains('vertical-line'));
-        let lastChild = null;
-        for (let i = children.length - 1; i >= 0; i--) {
-          if (children[i].offsetHeight > 0) {
-            lastChild = children[i];
-            break;
-          }
-        }
-        if (!lastChild && children.length > 0) {
-          lastChild = children[children.length - 1];
-        }
-        if (lastChild) {
-          verticalLine.style.height = (lastChild.offsetTop + (lastChild.offsetHeight / 2)) + "px";
+        const scenarioChildren = Array.from(container.children).filter(child => child.classList.contains('scenario'));
+        if (scenarioChildren.length > 0) {
+          const lastScenario = scenarioChildren[scenarioChildren.length - 1];
+          const targetHeight = lastScenario.offsetTop + (lastScenario.offsetHeight / 2);
+          verticalLine.style.height = targetHeight + "px";
         } else {
-          verticalLine.style.height = "0px";
+          const children = Array.from(container.children).filter(child => !child.classList.contains('vertical-line'));
+          let lastChild = null;
+          for (let i = children.length - 1; i >= 0; i--) {
+            if (children[i].offsetHeight > 0) {
+              lastChild = children[i];
+              break;
+            }
+          }
+          if (!lastChild && children.length > 0) {
+            lastChild = children[children.length - 1];
+          }
+          if (lastChild) {
+            verticalLine.style.height = (lastChild.offsetTop + (lastChild.offsetHeight / 2)) + "px";
+          } else {
+            verticalLine.style.height = "0px";
+          }
         }
       }
       
@@ -1803,6 +1822,7 @@
         adjustVerticalLine(parentTreeContainer);
       }
     }
+    // ===== 여기까지 =====
     
     function filterFAQ() {
       const query = document.getElementById("search").value.trim().toLowerCase();
