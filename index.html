@@ -182,7 +182,7 @@
     .faq-item.subcategory {
       background: #f1f5fa;
     }
-    /* ----- 추가: faq-item subcategory.active 스타일 (faq-item category active expanded와 동일) ----- */
+    /* ----- 추가: faq-item subcategory.active 스타일 ----- */
     #sidebar .faq-item.subcategory.active {
       background: #d1d6dc;
       color: #000;
@@ -364,6 +364,20 @@
       caret-color: transparent;
       outline: none;
     }
+    /* ----- 추가: 모바일 환경에서 모달창 최적화 ----- */
+    @media (max-width: 768px) {
+      .modal-content {
+        width: 90%;
+        max-width: 100%;
+        height: 90vh;
+        margin: 5vh auto;
+      }
+      .iframe-container {
+        width: 100%;
+        height: calc(90vh - 80px); /* 모달 타이틀 및 여백 고려 */
+        margin: 10px auto;
+      }
+    }
   </style>
 </head>
 <body>
@@ -428,7 +442,6 @@
   <script>
     // faqData 예시 (subCategory가 없는 항목과 있는 항목을 혼합)
     const faqData = [  
-
  {
     topCategory: "리뷰 프로모션",
     scenario: "도입",
