@@ -30,8 +30,8 @@
       border-right: 2px solid #ddd;
       overflow-y: auto;
       background: #ffffff;
-      user-select: none;
-      caret-color: transparent;
+      user-select: text;
+      caret-color: auto;
     }
     #sidebar input {
       user-select: text;
@@ -152,6 +152,8 @@
       padding: 10px;
       text-align: left;
       font-weight: bold;
+      user-select: text;
+      caret-color: auto;
     }
     .faq-item:hover {
       background: #e0e0e0;
@@ -191,12 +193,16 @@
       font-size: 16px;
       color: #555;
       margin-bottom: 10px;
+      user-select: text;
+      caret-color: auto;
     }
     .selected-question {
       font-size: 22px;
       font-weight: bold;
       color: #007bff;
       margin-bottom: 10px;
+      user-select: text;
+      caret-color: auto;
     }
     .selected-response {
       padding: 15px;
@@ -204,11 +210,15 @@
       border-radius: 5px;
       font-size: 18px;
       line-height: 1.67;
+      user-select: text;
+      caret-color: auto;
     }
     .question-breadcrumb {
       font-size: 12px;
       color: #888;
       margin-bottom: 3px;
+      user-select: text;
+      caret-color: auto;
     }
     .search-container {
       padding-bottom: 10px;
@@ -226,6 +236,8 @@
     .faq-header {
       display: flex;
       align-items: center;
+      user-select: text;
+      caret-color: auto;
     }
     .info-button {
       width: 24px;
@@ -254,6 +266,8 @@
       font-size: 14px;
       white-space: nowrap;
       z-index: 1000;
+      user-select: text;
+      caret-color: auto;
     }
     .tooltip.show {
       display: block;
@@ -323,6 +337,8 @@
       font-weight: bold;
       padding: 20px 0 10px 0;
       border-bottom: 1px solid #ddd;
+      user-select: text;
+      caret-color: auto;
     }
     .iframe-container {
       width: 50%;
@@ -334,6 +350,8 @@
     }
     .image-comment-above, .image-comment-below {
       margin: 10px 0;
+      user-select: text;
+      caret-color: auto;
     }
     .image-comment-above img, .image-comment-below img {
       max-width: 100%;
@@ -343,41 +361,8 @@
     .comment-above, .comment-below {
       margin-top: 5px;
       font-size: 14px;
-    }
-    .faq-item,
-    .faq-item.top-category.active.expanded,
-    .faq-item.scenario.active.expanded,
-    .faq-item.category.active,
-    .faq-item.active,
-    .breadcrumb,
-    .selected-question,
-    .comment-above,
-    .selected-response,
-    .comment-below,
-    .faq-header,
-    .sidebar-label,
-    .question-label,
-    .question-display {
-      user-select: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      caret-color: transparent;
-      outline: none;
-    }
-    /* ----- 추가: 모바일 환경에서 모달창 최적화 ----- */
-    @media (max-width: 768px) {
-      .modal-content {
-        width: 90%;
-        max-width: 100%;
-        height: 90vh;
-        margin: 5vh auto;
-      }
-      .iframe-container {
-        width: 100%;
-        height: calc(90vh - 80px); /* 모달 타이틀 및 여백 고려 */
-        margin: 10px auto;
-      }
+      user-select: text;
+      caret-color: auto;
     }
   </style>
 </head>
