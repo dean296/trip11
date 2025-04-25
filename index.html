@@ -2933,7 +2933,7 @@ additionalResponse: "⚠️ [1차] 파트너가 수긍하지 않는 경우, 추�
          questions = faqData.filter(item => item.topCategory === topCat && item.scenario === scenario && item.category === category && item.subCategory === subCategory);
          breadcrumb = topCat + " > " + scenario + " > " + category + " > " + subCategory;
       }
-      container.innerHTML = "<p class='question-label'>2️⃣ 파트너 질문 선택</p>" +
+      container.innerHTML = "<p class='question-label'>❷ 파트너 질문 선택</p>" +
         questions.map(item =>
           `<div class="faq-item" onclick="selectQuestion(this, '${
             item.topCategory}', '${item.scenario}', '${item.category}', '${
@@ -3004,7 +3004,7 @@ additionalResponse: "⚠️ [1차] 파트너가 수긍하지 않는 경우, 추�
 
       const container = document.getElementById("questionSection");
       if(query === "" && selectedTop === "") {
-        container.innerHTML = "<p class='question-label'>2️⃣ 파트너 질문 선택</p>";
+        container.innerHTML = "<p class='question-label'>❷ 파트너 질문 선택</p>";
         return;
       }
 
